@@ -32,7 +32,6 @@ public class DeploymentAnnotationProcessor implements AnnotationProcessor {
         initialDelaySeconds,
         periodSeconds,
         imagePullPolicy,
-        namespace,
         image,
         env,
         buildImage,

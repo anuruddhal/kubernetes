@@ -156,3 +156,19 @@ public struct  PersistentVolumeClaims{
 
 @Description {value:"ConfigMap volumes annotation for Kubernetes"}
 public annotation <service> PersistentVolumeClaim PersistentVolumeClaims;
+
+
+@Description {value:"Kubernetes Run Annotations"}
+@Field {value:"masterUrl:Kubernetes master url"}
+@Field {value:"namespace:Namespace to be deployed"}
+@Field {value:"CA cert file location for kubernetes master"}
+@Field {value:"oauthTokenFile:Oauth Token File location"}
+public struct KubernetesConfig {
+   string masterUrl;
+   string namespace;
+   string certFile;
+   string oauthTokenFile;
+}
+
+@Description {value:"Run annotation for Kubernetes"}
+public annotation <service> Run KubernetesConfig;
