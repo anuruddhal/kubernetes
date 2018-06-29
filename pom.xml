@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>kubernetes-extension-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Ballerinax Kubernetes</name>
+    <name>Ballerina Kubernetes Parent</name>
     <url>http://ballerinalang.org</url>
 
     <repositories>

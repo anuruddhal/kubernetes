@@ -76,8 +76,8 @@
                             </systemProperties>
                             <arguments>
                                 <argument>false</argument>
-                                <argument>${basedir}/src/main/ballerina/</argument>
-                                <argument>${project.build.directory}/generated-balo/repo/ballerina</argument>
+                                <argument>${basedir}/src/main/ballerina/ballerinax</argument>
+                                <argument>${project.build.directory}/generated-balo/repo/ballerinax</argument>
                                 <argument>${project.build.directory}</argument>
                                 <argument>${project.version}</argument>
                             </arguments>

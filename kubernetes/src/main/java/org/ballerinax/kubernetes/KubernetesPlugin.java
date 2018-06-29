@@ -19,6 +19,7 @@
 package org.ballerinax.kubernetes;
 
 import org.ballerinalang.compiler.plugins.AbstractCompilerPlugin;
+import org.ballerinalang.compiler.plugins.SupportEndpointTypes;
 import org.ballerinalang.compiler.plugins.SupportedAnnotationPackages;
 import org.ballerinalang.model.elements.PackageID;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
@@ -34,6 +35,8 @@ import org.ballerinax.kubernetes.models.KubernetesDataHolder;
 import org.ballerinax.kubernetes.processors.AnnotationProcessorFactory;
 import org.ballerinax.kubernetes.utils.KubernetesUtils;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
+import org.wso2.ballerinalang.compiler.util.diagnotic.BDiagnosticSource;
+import org.wso2.ballerinalang.compiler.util.diagnotic.DiagnosticPos;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -49,7 +52,11 @@ import static org.ballerinax.kubernetes.utils.KubernetesUtils.printError;
  */
 @SupportedAnnotationPackages(
         //TODO: Verify adding version is correct
-        value = "ballerinax/kubernetes:0.0.0"
+        value = {"ballerinax/kubernetes:0.0.0", "ballerinax/composite:0.0.0"}
+)
+@SupportEndpointTypes(
+        value = {@SupportEndpointTypes.EndpointType(orgName = "ballerinax", packageName = "composite:0.0.0",
+                name = "Listener")}
 )
 public class KubernetesPlugin extends AbstractCompilerPlugin {
     private DiagnosticLog dlog;

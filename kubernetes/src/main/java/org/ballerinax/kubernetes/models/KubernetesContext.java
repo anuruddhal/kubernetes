@@ -26,6 +26,7 @@ import java.util.Map;
  */
 public class KubernetesContext {
     private static KubernetesContext instance;
+    //Map to hold KubernetesDataHolder object against package ID.
     private final Map<String, KubernetesDataHolder> k8sContext;
     private String currentPackage;
 
@@ -51,6 +52,7 @@ public class KubernetesContext {
         this.currentPackage = packageID;
     }
 
+    //Returns the KubernetesDataHolder for current package.
     public KubernetesDataHolder getDataHolder() {
         return this.k8sContext.get(this.currentPackage);
     }

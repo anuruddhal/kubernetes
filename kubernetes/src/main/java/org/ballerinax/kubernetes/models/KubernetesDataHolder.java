@@ -18,8 +18,10 @@
 
 package org.ballerinax.kubernetes.models;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,6 +42,7 @@ public class KubernetesDataHolder {
     private JobModel jobModel;
     private String balxFilePath;
     private String outputDir;
+    private List<CompositeContainerModel> compositeContainers;
 
     public KubernetesDataHolder() {
         this.bEndpointToK8sServiceMap = new HashMap<>();
@@ -48,6 +51,7 @@ public class KubernetesDataHolder {
         this.configMapModelSet = new HashSet<>();
         this.volumeClaimModelSet = new HashSet<>();
         ingressModelSet = new HashSet<>();
+        compositeContainers = new ArrayList<>();
     }
 
     public DeploymentModel getDeploymentModel() {
@@ -156,5 +160,13 @@ public class KubernetesDataHolder {
 
     public void setDockerModel(DockerModel dockerModel) {
         this.dockerModel = dockerModel;
+    }
+
+    public void addCompositeContainer(CompositeContainerModel compositeContainerModel) {
+        this.compositeContainers.add(compositeContainerModel);
+    }
+
+    public List<CompositeContainerModel> getCompositeContainers() {
+        return this.compositeContainers;
     }
 }

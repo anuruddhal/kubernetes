@@ -37,6 +37,7 @@ public class DeploymentModel extends KubernetesModel {
     private int initialDelaySeconds;
     private int periodSeconds;
     private String imagePullPolicy;
+    private String imagePullSecret;
     private String image;
     private boolean buildImage;
     private String baseImage;
@@ -306,5 +307,13 @@ public class DeploymentModel extends KubernetesModel {
 
     public void setSingleYAML(boolean singleYAML) {
         this.singleYAML = singleYAML;
+    }
+
+    public String getImagePullSecrets() {
+        return imagePullSecret;
+    }
+
+    public void setImagePullSecret(String imagePullSecret) {
+        this.imagePullSecret = imagePullSecret;
     }
 }

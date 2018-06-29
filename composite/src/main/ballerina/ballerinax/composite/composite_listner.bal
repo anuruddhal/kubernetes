@@ -103,7 +103,7 @@ public type CompositeEndpointConfiguration record {
 documentation {
     Returns a hostname/IP of the given composite endpoint
 
-    F{{Listener}} The Listner endpoint
+    P{{Listener}} The Listner endpoint
     R{{}} The hostname of the endpoint
 }
 public function getHost(Listener listner) returns (string) {
@@ -113,7 +113,7 @@ public function getHost(Listener listner) returns (string) {
 documentation {
     Returns the port of the given composite endpoint
 
-    F{{Listener}} The Listner endpoint
+    P{{Listener}} The Listner endpoint
     R{{}} The port of the composite endpoint
 }
 public function getPort(Listener listner) returns (int) {
