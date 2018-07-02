@@ -85,6 +85,31 @@ public class KubernetesUtils {
     }
 
     /**
+     * Write content to a File. Create the required directories if they don't not exists.
+     *
+     * @param context        context of the file
+     * @throws IOException If an error occurs when writing to a file
+     */
+    public static void writeToFileComposite(String context) throws IOException {
+        KubernetesDataHolder dataHolder = KubernetesContext.getInstance().getDataHolder();
+        String outputFileName = dataHolder.getOutputDir() + File
+                .separator + extractBalxName(dataHolder.getBalxFilePath()) + "_composite" + YAML;
+
+        File newFile = new File(outputFileName);
+        // append if file exists
+        if (newFile.exists()) {
+            Files.write(Paths.get(outputFileName), context.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            return;
+        }
+        //create required directories
+        if (newFile.getParentFile().mkdirs()) {
+            Files.write(Paths.get(outputFileName), context.getBytes(StandardCharsets.UTF_8));
+            return;
+        }
+        Files.write(Paths.get(outputFileName), context.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
      * Read contents of a File.
      *
      * @param targetFilePath target file path

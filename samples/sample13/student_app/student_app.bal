@@ -2,24 +2,41 @@ import ballerina/io;
 import ballerina/jdbc;
 import ballerinax/composite;
 import ballerina/http;
+import ballerinax/kubernetes;
 
 endpoint jdbc:Client testDB {
-    //url: "jdbc:mysql://" + composite:getHost(helloEP) + ":" + composite:getPort(helloEP) + "/testdb",
-    url: "jdbc:mysql://localhost:3306/testdb",
+    url: "jdbc:mysql://" + composite:getHost(mysql_ep) + ":" + composite:getPort(mysql_ep) + "/testdb",
     username: "root",
     password: "root",
-    poolOptions: { maximumPoolSize: 5 }
+    poolOptions: { maximumPoolSize: 5 },
+    dbOptions: { useSSL: false }
 };
 
-endpoint http:Listener myEP {
+@kubernetes:Service {
+    serviceType: "NodePort"
+}
+endpoint http:Listener student_ep {
     port: 9090
 };
 
-@http:ServiceConfig {
-    basePath: "/MyDB"
+@kubernetes:Deployment {
+    singleYAML: true,
+    copyFiles: [
+        {
+            target: "/ballerina/runtime/bre/lib",
+            source: "./conf/mysql-connector-java-5.1.46.jar"
+        }
+    ]
 }
-service<http:Service> MyDB bind myEP {
-    createTable(endpoint outboundEP, http:Request request) {
+@http:ServiceConfig {
+    basePath: "/students"
+}
+service<http:Service> Student_APP bind student_ep {
+    @http:ResourceConfig {
+        methods: ["GET"],
+        path: "/"
+    }
+    getStudent(endpoint outboundEP, http:Request request) {
         http:Response response = new;
 
         var selectRet = testDB->select("SELECT * FROM student", ());
@@ -35,7 +52,6 @@ service<http:Service> MyDB bind myEP {
         match jsonConversionRet {
             json jsonRes => {
                 response.setJsonPayload(untaint jsonRes);
-
             }
             error e => {
                 io:println("Error in table to json conversion");
@@ -46,9 +62,4 @@ service<http:Service> MyDB bind myEP {
 
     }
 }
-
-//function main(string... args) {
-//    io:println(composite:getHost(helloEP));
-//    io:println(composite:getPort(helloEP));
-//}
 

@@ -35,8 +35,6 @@ import org.ballerinax.kubernetes.models.KubernetesDataHolder;
 import org.ballerinax.kubernetes.processors.AnnotationProcessorFactory;
 import org.ballerinax.kubernetes.utils.KubernetesUtils;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
-import org.wso2.ballerinalang.compiler.util.diagnotic.BDiagnosticSource;
-import org.wso2.ballerinalang.compiler.util.diagnotic.DiagnosticPos;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -51,7 +49,6 @@ import static org.ballerinax.kubernetes.utils.KubernetesUtils.printError;
  * Compiler plugin to generate kubernetes artifacts.
  */
 @SupportedAnnotationPackages(
-        //TODO: Verify adding version is correct
         value = {"ballerinax/kubernetes:0.0.0", "ballerinax/composite:0.0.0"}
 )
 @SupportEndpointTypes(
@@ -88,6 +85,15 @@ public class KubernetesPlugin extends AbstractCompilerPlugin {
 
     @Override
     public void process(EndpointNode endpointNode, List<AnnotationAttachmentNode> annotations) {
+        if ("composite".equals(endpointNode.getEndPointType().getPackageAlias().getValue())) {
+            try {
+                AnnotationProcessorFactory.getAnnotationProcessorInstance("ContainerConfig").processAnnotation
+                        (endpointNode, null);
+            } catch (KubernetesPluginException e) {
+                dlog.logDiagnostic(Diagnostic.Kind.ERROR, endpointNode.getPosition(), e.getMessage());
+            }
+            return;
+        }
         String endpointType = endpointNode.getEndPointType().getTypeName().getValue();
         if (isBlank(endpointType) || !endpointType.endsWith(LISTENER)) {
             dlog.logDiagnostic(Diagnostic.Kind.ERROR, endpointNode.getPosition(), "@kubernetes annotations are only " +

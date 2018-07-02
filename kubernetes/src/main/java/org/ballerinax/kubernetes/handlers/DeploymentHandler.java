@@ -184,7 +184,7 @@ public class DeploymentHandler extends AbstractArtifactHandler {
      * @param deploymentModel @{@link DeploymentModel} definition
      * @throws KubernetesPluginException If an error occurs while generating artifact.
      */
-    private void generate(DeploymentModel deploymentModel) throws KubernetesPluginException {
+    public String generate(DeploymentModel deploymentModel) throws KubernetesPluginException {
         List<ContainerPort> containerPorts = null;
         if (deploymentModel.getPorts() != null) {
             containerPorts = populatePorts(deploymentModel.getPorts());
@@ -214,8 +214,7 @@ public class DeploymentHandler extends AbstractArtifactHandler {
 
         try {
             String deploymentContent = SerializationUtils.dumpWithoutRuntimeStateAsYaml(deployment);
-            KubernetesUtils.writeToFile(deploymentContent, DEPLOYMENT_FILE_POSTFIX + YAML);
-
+            return deploymentContent;
         } catch (IOException e) {
             String errorMessage = "Error while generating yaml file for deployment: " + deploymentModel.getName();
             throw new KubernetesPluginException(errorMessage, e);
@@ -244,7 +243,13 @@ public class DeploymentHandler extends AbstractArtifactHandler {
             deploymentModel.setLivenessPort(deploymentModel.getPorts().iterator().next());
         }
         dataHolder.setDeploymentModel(deploymentModel);
-        generate(deploymentModel);
+        try {
+            String deploymentContent = generate(deploymentModel);
+            KubernetesUtils.writeToFile(deploymentContent, DEPLOYMENT_FILE_POSTFIX + YAML);
+        } catch (IOException e) {
+            String errorMessage = "Error while generating yaml file for deployment: " + deploymentModel.getName();
+            throw new KubernetesPluginException(errorMessage, e);
+        }
         OUT.println();
         OUT.println("\t@kubernetes:Deployment \t\t\t - complete 1/1");
         dataHolder.setDockerModel(getDockerModel(deploymentModel));

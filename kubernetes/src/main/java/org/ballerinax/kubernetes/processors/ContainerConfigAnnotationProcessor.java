@@ -18,17 +18,22 @@
 package org.ballerinax.kubernetes.processors;
 
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
+import org.ballerinalang.model.tree.EndpointNode;
 import org.ballerinalang.model.tree.ServiceNode;
+import org.ballerinax.kubernetes.KubernetesConstants;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
 import org.ballerinax.kubernetes.models.DeploymentModel;
 import org.ballerinax.kubernetes.models.KubernetesContext;
+import org.ballerinax.kubernetes.models.ServiceModel;
 import org.wso2.ballerinalang.compiler.tree.BLangAnnotationAttachment;
+import org.wso2.ballerinalang.compiler.tree.BLangEndpoint;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 
 import java.util.List;
 
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getMap;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getValidName;
+import static org.ballerinax.kubernetes.utils.KubernetesUtils.isBlank;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.resolveValue;
 
 /**
@@ -37,12 +42,9 @@ import static org.ballerinax.kubernetes.utils.KubernetesUtils.resolveValue;
 public class ContainerConfigAnnotationProcessor extends AbstractAnnotationProcessor {
 
     @Override
-    public void processAnnotation(ServiceNode entityName, AnnotationAttachmentNode attachmentNode) throws
+    public void processAnnotation(ServiceNode serviceNode, AnnotationAttachmentNode attachmentNode) throws
             KubernetesPluginException {
-        processDeployment(attachmentNode);
-    }
-
-    private void processDeployment(AnnotationAttachmentNode attachmentNode) throws KubernetesPluginException {
+        // Process Deployment Annotation
         DeploymentModel deploymentModel = new DeploymentModel();
         List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
                 ((BLangRecordLiteral) ((BLangAnnotationAttachment) attachmentNode).expr).getKeyValuePairs();
@@ -88,9 +90,56 @@ public class ContainerConfigAnnotationProcessor extends AbstractAnnotationProces
                     break;
             }
         }
-        KubernetesContext.getInstance().getDataHolder().setDeploymentModel(deploymentModel);
+        if (isBlank(deploymentModel.getName())) {
+            throw new KubernetesPluginException("@composite:ContainerConfig{}: name attribute cannot be empty");
+        }
+        if (isBlank(deploymentModel.getImage())) {
+            throw new KubernetesPluginException("@composite:ContainerConfig{}: image attribute cannot be empty");
+        }
+        deploymentModel.setBuildImage(false);
+        //TODO: Verify and handle multiple bounds.
+        String boundEndpoint = serviceNode.getBoundEndpoints().get(0).getVariableName().getValue();
+        deploymentModel.addLabel(KubernetesConstants.KUBERNETES_SELECTOR_KEY, boundEndpoint);
+        KubernetesContext.getInstance().getDataHolder().addCompositeDeploymentModel(boundEndpoint, deploymentModel);
     }
 
+    @Override
+    public void processAnnotation(EndpointNode endpointNode, AnnotationAttachmentNode attachmentNode) throws
+            KubernetesPluginException {
+        List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
+                ((BLangRecordLiteral) ((BLangEndpoint) endpointNode).configurationExpr).getKeyValuePairs();
+        ServiceModel serviceModel = new ServiceModel();
+        for (BLangRecordLiteral.BLangRecordKeyValue keyValue : keyValues) {
+            CompositeEndpointConfiguration endpointConfiguration = CompositeEndpointConfiguration.valueOf(keyValue
+                    .getKey().toString());
+            switch (endpointConfiguration) {
+                case host:
+                    //validate service hostname
+                    String providedHost = keyValue.getValue().toString();
+                    String validatedHost = getValidName(providedHost);
+                    if (!providedHost.equals(validatedHost)) {
+                        throw new KubernetesPluginException("Invalid hostname " + providedHost);
+                    }
+                    serviceModel.setName(validatedHost);
+                    break;
+                case port:
+                    try {
+                        int port = Integer.parseInt(keyValue.getValue().toString());
+                        serviceModel.setPort(port);
+                    } catch (NumberFormatException e) {
+                        throw new KubernetesPluginException("Composite Listener endpoint port must be an integer. " +
+                                "Found: " + keyValue.getValue().toString());
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+        }
+        String endpointName = endpointNode.getName().getValue();
+        serviceModel.setSelector(endpointName);
+        KubernetesContext.getInstance().getDataHolder().addCompositeServiceModel(endpointName, serviceModel);
+    }
 
     /**
      * Enum class for DeploymentConfiguration.
@@ -107,5 +156,13 @@ public class ContainerConfigAnnotationProcessor extends AbstractAnnotationProces
         imagePullSecret,
         image,
         env
+    }
+
+    /**
+     * Enum class for DeploymentConfiguration.
+     */
+    private enum CompositeEndpointConfiguration {
+        host,
+        port
     }
 }

@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>ballerinax-composite</artifactId>
     <packaging>jar</packaging>
-    <name>Ballerina Composite</name>
+    <name>Ballerina Composite Extension</name>
     <url>http://ballerinalang.org</url>
 
 

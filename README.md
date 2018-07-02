@@ -137,10 +137,13 @@ Annotation based kubernetes extension implementation for ballerina.
 ## How to run
 
 1. Download and install JDK 8 or later
-2. Get a clone or download the source from this repository (https://github.com/ballerinax/docker)
-3. Run the Maven command ``mvn clean  install`` from within the ``kubernetes`` directory.
-4. Copy ``target/kubernetes-extension-0.962.0.jar`` file to ``<BALLERINA_HOME>/bre/lib`` directory.
-5. Run ``ballerina build <.bal filename>`` to generate artifacts.
+2. Get a clone or download the source from this repository (https://github.com/ballerinax/kubernetes).
+3. Run the Maven command ``mvn clean  install`` from the cloned directory.
+4. Copy ``kubernetes/target/kubernetes-extension-<version>.jar`` file to ``<BALLERINA_HOME>/bre/lib`` directory.
+5. Unzip ``kubernetes/target/kubernetes-extension-<version>-ballerina-binary-repo.zip`` file and copy `ballerinax` folder to ``<BALLERINA_HOME>/lib/repo`` directory.
+6. Copy ``ballerinax-composite-<version>.jar`` file to ``<BALLERINA_HOME>/bre/lib`` directory.
+7. Unzip ``composite/target/ballerinax-composite-<version>-ballerina-binary-repo.zip`` file and merge `ballerinax` folder to ``<BALLERINA_HOME>/lib/repo`` directory.
+8. Run ``ballerina build <.bal filename>`` to generate artifacts.
 
 The docker artifacts will be created in a folder called target with following structure.
 ```bash

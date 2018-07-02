@@ -45,7 +45,7 @@ public class ServiceHandler extends AbstractArtifactHandler {
      *
      * @throws KubernetesPluginException If an error occurs while generating artifact.
      */
-    private void generate(ServiceModel serviceModel) throws KubernetesPluginException {
+    public String generate(ServiceModel serviceModel) throws KubernetesPluginException {
         Service service = new ServiceBuilder()
                 .withNewMetadata()
                 .withName(serviceModel.getName())
@@ -62,10 +62,9 @@ public class ServiceHandler extends AbstractArtifactHandler {
                 .endSpec()
                 .build();
         try {
-            String serviceYAML = SerializationUtils.dumpWithoutRuntimeStateAsYaml(service);
-            KubernetesUtils.writeToFile(serviceYAML, SVC_FILE_POSTFIX + YAML);
+            return SerializationUtils.dumpWithoutRuntimeStateAsYaml(service);
         } catch (IOException e) {
-            String errorMessage = "Error while generating yaml file for service: " + serviceModel.getName();
+            String errorMessage = "Error while generating yaml file for deployment: " + serviceModel.getName();
             throw new KubernetesPluginException(errorMessage, e);
         }
 
@@ -83,7 +82,13 @@ public class ServiceHandler extends AbstractArtifactHandler {
                     .getBalxFilePath());
             serviceModel.addLabel(KubernetesConstants.KUBERNETES_SELECTOR_KEY, balxFileName);
             serviceModel.setSelector(balxFileName);
-            generate(serviceModel);
+            try {
+                String serviceYAML = generate(serviceModel);
+                KubernetesUtils.writeToFile(serviceYAML, SVC_FILE_POSTFIX + YAML);
+            } catch (IOException e) {
+                String errorMessage = "Error while generating yaml file for service: " + serviceModel.getName();
+                throw new KubernetesPluginException(errorMessage, e);
+            }
             deploymentModel.addPort(serviceModel.getPort());
             OUT.print("\t@kubernetes:Service \t\t\t - complete " + count + "/" + serviceModels.size() + "\r");
         }

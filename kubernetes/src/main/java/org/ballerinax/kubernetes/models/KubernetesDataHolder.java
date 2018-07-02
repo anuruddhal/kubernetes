@@ -18,10 +18,8 @@
 
 package org.ballerinax.kubernetes.models;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,7 +32,8 @@ public class KubernetesDataHolder {
     private DockerModel dockerModel;
     private PodAutoscalerModel podAutoscalerModel;
     private Map<String, ServiceModel> bEndpointToK8sServiceMap;
-    private Map<String, Set<SecretModel>> endPointToSecretMap;
+    private Map<String, Set<SecretModel>> endpointToSecretMap;
+    private Map<String, CompositeContainerModel> endpointToContainerModelMap;
     private Set<SecretModel> secretModelSet;
     private Set<IngressModel> ingressModelSet;
     private Set<ConfigMapModel> configMapModelSet;
@@ -42,16 +41,15 @@ public class KubernetesDataHolder {
     private JobModel jobModel;
     private String balxFilePath;
     private String outputDir;
-    private List<CompositeContainerModel> compositeContainers;
 
     public KubernetesDataHolder() {
         this.bEndpointToK8sServiceMap = new HashMap<>();
-        this.endPointToSecretMap = new HashMap<>();
+        this.endpointToSecretMap = new HashMap<>();
         this.secretModelSet = new HashSet<>();
         this.configMapModelSet = new HashSet<>();
         this.volumeClaimModelSet = new HashSet<>();
         ingressModelSet = new HashSet<>();
-        compositeContainers = new ArrayList<>();
+        endpointToContainerModelMap = new HashMap<>();
     }
 
     public DeploymentModel getDeploymentModel() {
@@ -71,11 +69,26 @@ public class KubernetesDataHolder {
     }
 
     public Map<String, Set<SecretModel>> getSecretModels() {
-        return endPointToSecretMap;
+        return endpointToSecretMap;
+    }
+
+    public void addCompositeServiceModel(String endpointName, ServiceModel serviceModel) {
+        //Add map with service model
+        CompositeContainerModel containerModel = new CompositeContainerModel();
+        containerModel.setServiceModel(serviceModel);
+        this.endpointToContainerModelMap.put(endpointName, containerModel);
+    }
+
+    public void addCompositeDeploymentModel(String endpointName, DeploymentModel deploymentModel) {
+        //Update the map with deployment model
+        CompositeContainerModel containerModel = this.endpointToContainerModelMap.get(endpointName);
+        deploymentModel.addPort(containerModel.getServiceModel().getPort());
+        containerModel.setDeploymentModel(deploymentModel);
+        this.endpointToContainerModelMap.put(endpointName, containerModel);
     }
 
     public void addEndpointSecret(String endpointName, Set<SecretModel> secretModel) {
-        this.endPointToSecretMap.put(endpointName, secretModel);
+        this.endpointToSecretMap.put(endpointName, secretModel);
     }
 
     public Set<SecretModel> getSecretModelSet() {
@@ -162,11 +175,7 @@ public class KubernetesDataHolder {
         this.dockerModel = dockerModel;
     }
 
-    public void addCompositeContainer(CompositeContainerModel compositeContainerModel) {
-        this.compositeContainers.add(compositeContainerModel);
-    }
-
-    public List<CompositeContainerModel> getCompositeContainers() {
-        return this.compositeContainers;
+    public Map<String, CompositeContainerModel> getEndpointToContainerModelMap() {
+        return this.endpointToContainerModelMap;
     }
 }

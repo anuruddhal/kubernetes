@@ -1,7 +1,7 @@
 package org.ballerinax.kubernetes.models;
 
 /**
- * Class to hold deployment and service info for composite container
+ * Class to hold deployment and service info for composite container.
  */
 public class CompositeContainerModel {
     private DeploymentModel deploymentModel;
