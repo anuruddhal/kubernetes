@@ -35,6 +35,8 @@ import org.ballerinax.kubernetes.models.KubernetesDataHolder;
 import org.ballerinax.kubernetes.processors.AnnotationProcessorFactory;
 import org.ballerinax.kubernetes.utils.KubernetesUtils;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
+import org.wso2.ballerinalang.compiler.util.diagnotic.BDiagnosticSource;
+import org.wso2.ballerinalang.compiler.util.diagnotic.DiagnosticPos;
 
 import java.io.File;
 import java.nio.file.Path;

@@ -24,11 +24,9 @@ documentation {
 }
 public type Listener object {
 
+    private  CompositeEndpointConfiguration config;
+    private  Remote conn;
 
-    private {
-        CompositeEndpointConfiguration config;
-        Remote conn;
-    }
 
     documentation {
         Gets invoked during package initialization to initialize the endpoint.
@@ -83,10 +81,8 @@ documentation {
     F{{port}} The remote port
 }
 public type Remote object {
-    public {
-        @readonly string host;
-        @readonly int port;
-    }
+        @readonly public string host;
+        @readonly public int port;
 };
 
 documentation {
