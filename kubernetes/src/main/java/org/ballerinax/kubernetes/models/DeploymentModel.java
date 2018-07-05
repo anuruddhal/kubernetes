@@ -313,6 +313,14 @@ public class DeploymentModel extends KubernetesModel {
         return imagePullSecret;
     }
 
+    public void addSecrets(Set<SecretModel> secrets) {
+        this.secretModels.addAll(secrets);
+    }
+
+    public void addPersistentVolumeClaims(Set<PersistentVolumeClaimModel> persistentVolumeClaims) {
+        this.volumeClaimModels.addAll(persistentVolumeClaims);
+    }
+
     public void setImagePullSecret(String imagePullSecret) {
         this.imagePullSecret = imagePullSecret;
     }

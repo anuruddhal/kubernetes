@@ -56,7 +56,7 @@ public class KubernetesSecretGeneratorTests {
         secretModel.setData(data);
         Set<SecretModel> secretModels = new HashSet<>();
         secretModels.add(secretModel);
-        KubernetesContext.getInstance().getDataHolder().addSecrets(secretModels);
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().addSecrets(secretModels);
         try {
             new SecretHandler().createArtifacts();
             File tempFile = new File("target" + File.separator + "kubernetes" + File.separator + "hello_secret.yaml");

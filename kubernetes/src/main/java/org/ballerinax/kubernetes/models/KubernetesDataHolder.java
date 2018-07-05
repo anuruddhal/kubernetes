@@ -18,6 +18,8 @@
 
 package org.ballerinax.kubernetes.models;
 
+import org.ballerinax.kubernetes.KubernetesConstants;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,14 +32,10 @@ public class KubernetesDataHolder {
     private boolean canProcess;
     private DeploymentModel deploymentModel;
     private DockerModel dockerModel;
-    private PodAutoscalerModel podAutoscalerModel;
     private Map<String, ServiceModel> bEndpointToK8sServiceMap;
     private Map<String, Set<SecretModel>> endpointToSecretMap;
     private Map<String, CompositeContainerModel> endpointToContainerModelMap;
-    private Set<SecretModel> secretModelSet;
     private Set<IngressModel> ingressModelSet;
-    private Set<ConfigMapModel> configMapModelSet;
-    private Set<PersistentVolumeClaimModel> volumeClaimModelSet;
     private JobModel jobModel;
     private String balxFilePath;
     private String outputDir;
@@ -45,11 +43,9 @@ public class KubernetesDataHolder {
     KubernetesDataHolder() {
         this.bEndpointToK8sServiceMap = new HashMap<>();
         this.endpointToSecretMap = new HashMap<>();
-        this.secretModelSet = new HashSet<>();
-        this.configMapModelSet = new HashSet<>();
-        this.volumeClaimModelSet = new HashSet<>();
         this.ingressModelSet = new HashSet<>();
         this.endpointToContainerModelMap = new HashMap<>();
+        this.deploymentModel = getDefaultDeploymentModel();
     }
 
     public DeploymentModel getDeploymentModel() {
@@ -58,14 +54,6 @@ public class KubernetesDataHolder {
 
     public void setDeploymentModel(DeploymentModel deploymentModel) {
         this.deploymentModel = deploymentModel;
-    }
-
-    public PodAutoscalerModel getPodAutoscalerModel() {
-        return podAutoscalerModel;
-    }
-
-    public void setPodAutoscalerModel(PodAutoscalerModel podAutoscalerModel) {
-        this.podAutoscalerModel = podAutoscalerModel;
     }
 
     public Map<String, Set<SecretModel>> getSecretModels() {
@@ -89,30 +77,6 @@ public class KubernetesDataHolder {
 
     public void addEndpointSecret(String endpointName, Set<SecretModel> secretModel) {
         this.endpointToSecretMap.put(endpointName, secretModel);
-    }
-
-    public Set<SecretModel> getSecretModelSet() {
-        return secretModelSet;
-    }
-
-    public void addSecrets(Set<SecretModel> secrets) {
-        this.secretModelSet.addAll(secrets);
-    }
-
-    public Set<ConfigMapModel> getConfigMapModelSet() {
-        return configMapModelSet;
-    }
-
-    public void addConfigMaps(Set<ConfigMapModel> configMaps) {
-        this.configMapModelSet.addAll(configMaps);
-    }
-
-    public Set<PersistentVolumeClaimModel> getVolumeClaimModelSet() {
-        return volumeClaimModelSet;
-    }
-
-    public void addPersistentVolumeClaims(Set<PersistentVolumeClaimModel> persistentVolumeClaims) {
-        this.volumeClaimModelSet.addAll(persistentVolumeClaims);
     }
 
     public Map<String, ServiceModel> getbEndpointToK8sServiceMap() {
@@ -177,5 +141,23 @@ public class KubernetesDataHolder {
 
     public Map<String, CompositeContainerModel> getEndpointToContainerModelMap() {
         return this.endpointToContainerModelMap;
+    }
+
+    /**
+     * Get DeploymentModel object with default values.
+     *
+     * @return DeploymentModel object with default values
+     */
+    private DeploymentModel getDefaultDeploymentModel() {
+        DeploymentModel deploymentModel = new DeploymentModel();
+        deploymentModel.setImagePullPolicy(KubernetesConstants.DEPLOYMENT_IMAGE_PULL_POLICY_DEFAULT);
+        deploymentModel.setEnableLiveness(KubernetesConstants.DEPLOYMENT_LIVENESS_DISABLE);
+        int defaultReplicas = 1;
+        deploymentModel.setReplicas(defaultReplicas);
+        deploymentModel.setEnv(new HashMap<>());
+        deploymentModel.setBuildImage(true);
+        deploymentModel.setPush(false);
+
+        return deploymentModel;
     }
 }

@@ -67,7 +67,7 @@ public class HPAAnnotationProcessor extends AbstractAnnotationProcessor {
                     break;
             }
         }
-        KubernetesContext.getInstance().getDataHolder().setPodAutoscalerModel(podAutoscalerModel);
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().setPodAutoscalerModel(podAutoscalerModel);
     }
 
     /**

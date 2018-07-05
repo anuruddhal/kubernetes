@@ -89,7 +89,7 @@ public class SecretAnnotationProcessor extends AbstractAnnotationProcessor {
                 secrets.add(secretModel);
             }
         }
-        KubernetesContext.getInstance().getDataHolder().addSecrets(secrets);
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().addSecrets(secrets);
     }
 
     private Map<String, String> getDataForSecret(List<BLangExpression> data) throws KubernetesPluginException {

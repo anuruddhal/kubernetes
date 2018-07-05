@@ -29,28 +29,19 @@ import org.ballerinax.kubernetes.handlers.JobHandler;
 import org.ballerinax.kubernetes.handlers.PersistentVolumeClaimHandler;
 import org.ballerinax.kubernetes.handlers.SecretHandler;
 import org.ballerinax.kubernetes.handlers.ServiceHandler;
-import org.ballerinax.kubernetes.models.DeploymentModel;
 import org.ballerinax.kubernetes.models.KubernetesContext;
 import org.ballerinax.kubernetes.models.KubernetesDataHolder;
 import org.ballerinax.kubernetes.utils.KubernetesUtils;
-
-import java.util.HashMap;
-
-import static org.ballerinax.kubernetes.KubernetesConstants.DEPLOYMENT_POSTFIX;
-import static org.ballerinax.kubernetes.KubernetesConstants.DOCKER_LATEST_TAG;
-import static org.ballerinax.kubernetes.utils.KubernetesUtils.getValidName;
 
 /**
  * Generate and write artifacts to files.
  */
 class ArtifactManager {
 
-    private final String balxFilePath;
     private final String outputDir;
     private KubernetesDataHolder kubernetesDataHolder;
 
-    ArtifactManager(String balxFilePath, String outputDir) {
-        this.balxFilePath = balxFilePath;
+    ArtifactManager(String outputDir) {
         this.outputDir = outputDir;
         this.kubernetesDataHolder = KubernetesContext.getInstance().getDataHolder();
     }
@@ -66,11 +57,6 @@ class ArtifactManager {
             printKubernetesInstructions(outputDir);
             return;
         }
-        DeploymentModel deploymentModel = kubernetesDataHolder.getDeploymentModel();
-        if (deploymentModel == null) {
-            deploymentModel = getDefaultDeploymentModel();
-        }
-        kubernetesDataHolder.setDeploymentModel(deploymentModel);
         new ServiceHandler().createArtifacts();
         new IngressHandler().createArtifacts();
         new SecretHandler().createArtifacts();
@@ -90,28 +76,5 @@ class ArtifactManager {
         KubernetesUtils.printInstruction("");
     }
 
-
-    /**
-     * Get DeploymentModel object with default values.
-     *
-     * @return DeploymentModel object with default values
-     */
-    private DeploymentModel getDefaultDeploymentModel() {
-        DeploymentModel deploymentModel = new DeploymentModel();
-        String balxName = KubernetesUtils.extractBalxName(balxFilePath);
-        String deploymentName = balxName + DEPLOYMENT_POSTFIX;
-        deploymentModel.setName(getValidName(deploymentName));
-        deploymentModel.setImagePullPolicy(KubernetesConstants.DEPLOYMENT_IMAGE_PULL_POLICY_DEFAULT);
-        deploymentModel.setEnableLiveness(KubernetesConstants.DEPLOYMENT_LIVENESS_DISABLE);
-        int defaultReplicas = 1;
-        deploymentModel.setReplicas(defaultReplicas);
-        deploymentModel.addLabel(KubernetesConstants.KUBERNETES_SELECTOR_KEY, balxName);
-        deploymentModel.setEnv(new HashMap<>());
-        deploymentModel.setImage(balxName + DOCKER_LATEST_TAG);
-        deploymentModel.setBuildImage(true);
-        deploymentModel.setPush(false);
-
-        return deploymentModel;
-    }
 
 }

@@ -71,7 +71,7 @@ public class PersistentVolumeClaimHandler extends AbstractArtifactHandler {
     @Override
     public void createArtifacts() throws KubernetesPluginException {
         int count = 0;
-        Collection<PersistentVolumeClaimModel> volumeClaims = dataHolder.getVolumeClaimModelSet();
+        Collection<PersistentVolumeClaimModel> volumeClaims = dataHolder.getDeploymentModel().getVolumeClaimModels();
         if (volumeClaims.size() > 0) {
             OUT.println();
         }

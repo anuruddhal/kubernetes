@@ -223,10 +223,6 @@ public class DeploymentHandler extends AbstractArtifactHandler {
     @Override
     public void createArtifacts() throws KubernetesPluginException {
         DeploymentModel deploymentModel = dataHolder.getDeploymentModel();
-        deploymentModel.setPodAutoscalerModel(dataHolder.getPodAutoscalerModel());
-        deploymentModel.setSecretModels(dataHolder.getSecretModelSet());
-        deploymentModel.setConfigMapModels(dataHolder.getConfigMapModelSet());
-        deploymentModel.setVolumeClaimModels(dataHolder.getVolumeClaimModelSet());
         String balxFileName = KubernetesUtils.extractBalxName(dataHolder.getBalxFilePath());
         if (isBlank(deploymentModel.getName())) {
             if (balxFileName != null) {

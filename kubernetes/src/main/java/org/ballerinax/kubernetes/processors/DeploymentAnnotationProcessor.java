@@ -58,7 +58,7 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
     }
 
     private void processDeployment(AnnotationAttachmentNode attachmentNode) throws KubernetesPluginException {
-        DeploymentModel deploymentModel = new DeploymentModel();
+        DeploymentModel deploymentModel = KubernetesContext.getInstance().getDataHolder().getDeploymentModel();
         List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
                 ((BLangRecordLiteral) ((BLangAnnotationAttachment) attachmentNode).expr).getKeyValuePairs();
         for (BLangRecordLiteral.BLangRecordKeyValue keyValue : keyValues) {

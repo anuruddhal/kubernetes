@@ -58,7 +58,7 @@ public class SecretHandler extends AbstractArtifactHandler {
     public void createArtifacts() throws KubernetesPluginException {
         //secret
         int count = 0;
-        Collection<SecretModel> secretModels = dataHolder.getSecretModelSet();
+        Collection<SecretModel> secretModels = dataHolder.getDeploymentModel().getSecretModels();
         if (secretModels.size() > 0) {
             OUT.println();
         }

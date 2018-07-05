@@ -70,7 +70,6 @@ public class KubernetesHPAGeneratorTests {
         podAutoscalerModel.setDeployment(deploymentName);
         podAutoscalerModel.setLabels(labels);
         deploymentModel.setPodAutoscalerModel(podAutoscalerModel);
-        KubernetesContext.getInstance().getDataHolder().setPodAutoscalerModel(podAutoscalerModel);
         KubernetesContext.getInstance().getDataHolder().setDeploymentModel(deploymentModel);
         try {
             new HPAHandler().createArtifacts();

@@ -56,7 +56,7 @@ public class KubernetesConfigMapGeneratorTests {
         configMapModel.setData(data);
         Set<ConfigMapModel> configMapModels = new HashSet<>();
         configMapModels.add(configMapModel);
-        KubernetesContext.getInstance().getDataHolder().addConfigMaps(configMapModels);
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().setConfigMapModels(configMapModels);
         try {
             new ConfigMapHandler().createArtifacts();
             File tempFile = new File("target" + File.separator + "kubernetes" + File.separator + "hello_config_map" +

@@ -83,7 +83,8 @@ public class VolumeClaimAnnotationProcessor extends AbstractAnnotationProcessor 
                 volumeClaimModels.add(claimModel);
             }
         }
-        KubernetesContext.getInstance().getDataHolder().addPersistentVolumeClaims(volumeClaimModels);
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().addPersistentVolumeClaims
+                (volumeClaimModels);
     }
 
     /**

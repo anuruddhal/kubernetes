@@ -132,7 +132,7 @@ public class KubernetesPlugin extends AbstractCompilerPlugin {
             }
             dataHolder.setBalxFilePath(filePath);
             dataHolder.setOutputDir(targetPath);
-            ArtifactManager artifactManager = new ArtifactManager(filePath, targetPath);
+            ArtifactManager artifactManager = new ArtifactManager(targetPath);
             try {
                 KubernetesUtils.deleteDirectory(targetPath);
                 artifactManager.createArtifacts();

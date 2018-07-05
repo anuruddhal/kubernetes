@@ -49,7 +49,7 @@ public class KubernetesVolumeClaimGeneratorTests {
         volumeClaimModel.setAccessMode("ReadWriteOnce");
         Set<PersistentVolumeClaimModel> claimModles = new HashSet<>();
         claimModles.add(volumeClaimModel);
-        KubernetesContext.getInstance().getDataHolder().addPersistentVolumeClaims(claimModles);
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().addPersistentVolumeClaims(claimModles);
         try {
             new PersistentVolumeClaimHandler().createArtifacts();
             File tempFile = new File("target" + File.separator + "kubernetes" + File.separator + "hello_volume_claim" +

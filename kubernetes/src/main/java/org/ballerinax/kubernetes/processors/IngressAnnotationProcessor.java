@@ -215,7 +215,7 @@ public class IngressAnnotationProcessor extends AbstractAnnotationProcessor {
                             .valueExpr).getKeyValuePairs();
                     Set<SecretModel> secretModels = processSecureSocketAnnotation(endpointName, sslKeyValues);
                     KubernetesContext.getInstance().getDataHolder().addEndpointSecret(endpointName, secretModels);
-                    KubernetesContext.getInstance().getDataHolder().addSecrets(secretModels);
+                    KubernetesContext.getInstance().getDataHolder().getDeploymentModel().addSecrets(secretModels);
                     break;
                 default:
                     break;
