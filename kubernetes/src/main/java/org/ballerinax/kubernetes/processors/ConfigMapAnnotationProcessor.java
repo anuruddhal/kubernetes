@@ -128,7 +128,7 @@ public class ConfigMapAnnotationProcessor extends AbstractAnnotationProcessor {
 
             }
         }
-        KubernetesContext.getInstance().getDataHolder().addConfigMaps(configMapModels);
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().setConfigMapModels(configMapModels);
     }
 
     private Map<String, String> getDataForConfigMap(List<BLangExpression> data) throws KubernetesPluginException {

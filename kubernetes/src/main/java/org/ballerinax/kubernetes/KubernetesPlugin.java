@@ -35,27 +35,25 @@ import org.ballerinax.kubernetes.models.KubernetesDataHolder;
 import org.ballerinax.kubernetes.processors.AnnotationProcessorFactory;
 import org.ballerinax.kubernetes.utils.KubernetesUtils;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
-import org.wso2.ballerinalang.compiler.util.diagnotic.BDiagnosticSource;
-import org.wso2.ballerinalang.compiler.util.diagnotic.DiagnosticPos;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
+import static org.ballerinax.kubernetes.KubernetesConstants.CONTAINER;
 import static org.ballerinax.kubernetes.KubernetesConstants.LISTENER;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.extractBalxName;
-import static org.ballerinax.kubernetes.utils.KubernetesUtils.isBlank;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.printError;
 
 /**
  * Compiler plugin to generate kubernetes artifacts.
  */
 @SupportedAnnotationPackages(
-        value = {"ballerinax/kubernetes:0.0.0", "ballerinax/composite:0.0.0"}
+        value = {"ballerinax/kubernetes:0.0.0"}
 )
 @SupportEndpointTypes(
-        value = {@SupportEndpointTypes.EndpointType(orgName = "ballerinax", packageName = "composite:0.0.0",
-                name = "Listener")}
+        value = {@SupportEndpointTypes.EndpointType(orgName = "ballerinax", packageName = "docker:0.0.0",
+                name = "Container")}
 )
 public class KubernetesPlugin extends AbstractCompilerPlugin {
     private DiagnosticLog dlog;
@@ -87,19 +85,10 @@ public class KubernetesPlugin extends AbstractCompilerPlugin {
 
     @Override
     public void process(EndpointNode endpointNode, List<AnnotationAttachmentNode> annotations) {
-        if ("composite".equals(endpointNode.getEndPointType().getPackageAlias().getValue())) {
-            try {
-                AnnotationProcessorFactory.getAnnotationProcessorInstance("ContainerConfig").processAnnotation
-                        (endpointNode, null);
-            } catch (KubernetesPluginException e) {
-                dlog.logDiagnostic(Diagnostic.Kind.ERROR, endpointNode.getPosition(), e.getMessage());
-            }
-            return;
-        }
         String endpointType = endpointNode.getEndPointType().getTypeName().getValue();
-        if (isBlank(endpointType) || !endpointType.endsWith(LISTENER)) {
+        if (!endpointType.endsWith(LISTENER) && !endpointType.endsWith(CONTAINER)) {
             dlog.logDiagnostic(Diagnostic.Kind.ERROR, endpointNode.getPosition(), "@kubernetes annotations are only " +
-                    "supported with Listener endpoints.");
+                    "supported with Listener/Container endpoints. Found " + endpointType);
             return;
         }
         for (AnnotationAttachmentNode attachmentNode : annotations) {

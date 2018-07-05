@@ -104,7 +104,7 @@ public class DockerHandler extends AbstractArtifactHandler {
      * @throws InterruptedException When error with docker build process
      * @throws IOException          When error with docker build process
      */
-    public void buildImage(DockerModel dockerModel, String dockerDir) throws
+    private void buildImage(DockerModel dockerModel, String dockerDir) throws
             InterruptedException, IOException, KubernetesPluginException {
         disableFailOnUnknownProperties();
         Config dockerClientConfig = new ConfigBuilder()
@@ -160,7 +160,8 @@ public class DockerHandler extends AbstractArtifactHandler {
      * @throws InterruptedException When error with docker build process
      * @throws IOException          When error with docker build process
      */
-    public void pushImage(DockerModel dockerModel) throws InterruptedException, IOException, KubernetesPluginException {
+    private void pushImage(DockerModel dockerModel) throws InterruptedException, IOException,
+            KubernetesPluginException {
         disableFailOnUnknownProperties();
         AuthConfig authConfig = new AuthConfigBuilder().withUsername(dockerModel.getUsername()).withPassword
                 (dockerModel.getPassword())
@@ -311,7 +312,7 @@ public class DockerHandler extends AbstractArtifactHandler {
             return error;
         }
 
-        public String getErrorMsg() {
+        String getErrorMsg() {
             return errorMsg;
         }
 

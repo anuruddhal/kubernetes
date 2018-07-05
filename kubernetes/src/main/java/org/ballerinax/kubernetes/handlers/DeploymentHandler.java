@@ -213,8 +213,7 @@ public class DeploymentHandler extends AbstractArtifactHandler {
                 .build();
 
         try {
-            String deploymentContent = SerializationUtils.dumpWithoutRuntimeStateAsYaml(deployment);
-            return deploymentContent;
+            return SerializationUtils.dumpWithoutRuntimeStateAsYaml(deployment);
         } catch (IOException e) {
             String errorMessage = "Error while generating yaml file for deployment: " + deploymentModel.getName();
             throw new KubernetesPluginException(errorMessage, e);

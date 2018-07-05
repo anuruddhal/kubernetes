@@ -61,7 +61,7 @@ public class ConfigMapHandler extends AbstractArtifactHandler {
     public void createArtifacts() throws KubernetesPluginException {
         //configMap
         int count = 0;
-        Collection<ConfigMapModel> configMapModels = dataHolder.getConfigMapModelSet();
+        Collection<ConfigMapModel> configMapModels = dataHolder.getDeploymentModel().getConfigMapModels();
         if (configMapModels.size() > 0) {
             OUT.println();
         }

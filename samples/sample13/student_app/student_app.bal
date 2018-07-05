@@ -1,11 +1,11 @@
 import ballerina/io;
 import ballerina/jdbc;
-import ballerinax/composite;
+import ballerinax/docker;
 import ballerina/http;
 import ballerinax/kubernetes;
 
 endpoint jdbc:Client testDB {
-    url: "jdbc:mysql://" + composite:getHost(mysql_ep) + ":" + composite:getPort(mysql_ep) + "/testdb",
+    url: "jdbc:mysql://" + docker:getHost(mysql_ep) + ":" + docker:getPort(mysql_ep) + "/testdb",
     username: "root",
     password: "root",
     poolOptions: { maximumPoolSize: 5 },
@@ -20,7 +20,7 @@ endpoint http:Listener student_ep {
 };
 
 @kubernetes:Deployment {
-    singleYAML: true,
+    singleYAML: false,
     copyFiles: [
         {
             target: "/ballerina/runtime/bre/lib",

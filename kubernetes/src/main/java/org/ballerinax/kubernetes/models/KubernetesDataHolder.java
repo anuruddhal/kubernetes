@@ -42,14 +42,14 @@ public class KubernetesDataHolder {
     private String balxFilePath;
     private String outputDir;
 
-    public KubernetesDataHolder() {
+    KubernetesDataHolder() {
         this.bEndpointToK8sServiceMap = new HashMap<>();
         this.endpointToSecretMap = new HashMap<>();
         this.secretModelSet = new HashSet<>();
         this.configMapModelSet = new HashSet<>();
         this.volumeClaimModelSet = new HashSet<>();
-        ingressModelSet = new HashSet<>();
-        endpointToContainerModelMap = new HashMap<>();
+        this.ingressModelSet = new HashSet<>();
+        this.endpointToContainerModelMap = new HashMap<>();
     }
 
     public DeploymentModel getDeploymentModel() {

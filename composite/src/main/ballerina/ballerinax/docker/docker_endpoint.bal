@@ -15,16 +15,16 @@
 // under the License.
 
 /////////////////////////////
-/// Composite Service Endpoint ///
+/// Docker Container Endpoint ///
 /////////////////////////////
 documentation {
-    This is used for creating Composite service endpoints. A Composite service endpoint is capable of generating the artifacts for composite applications.
-    The `Listener` is responsible for initializing the endpoint using the provided configurations and
+    This is used for creating Docker Container endpoints. A Docker Container endpoint is capable of generating the artifacts for composite applications.
+    The `Continer` is responsible for initializing the endpoint using the provided configurations and
     providing the actions for communicating with the caller.
 }
-public type Listener object {
+public type Container object {
 
-    private  CompositeEndpointConfiguration config;
+    private  ContainerConfig config;
     private  Remote conn;
 
 
@@ -33,10 +33,10 @@ public type Listener object {
 
         P{{param_config}} - The CompositeEndpointConfiguration of the endpoint.
     }
-    public function init(CompositeEndpointConfiguration param_config) {
-        self.config = param_config;
-        conn.host = param_config.host;
-        conn.port = param_config.port;
+    public function init(ContainerConfig containerConfig) {
+        self.config = containerConfig;
+        conn.host = containerConfig.host;
+        conn.port = containerConfig.port;
     }
 
 
@@ -88,30 +88,33 @@ public type Remote object {
 documentation {
     Provides a set of configurations for Composite service endpoints.
 
-    F{{host}} The host name/IP of the endpoint
+    F{{host}} The hostname/IP of the endpoint
     F{{port}} The port to which the endpoint should bind to
+    F{{image}} The docker image to pull
 }
-public type CompositeEndpointConfiguration record {
+public type ContainerConfig record {
     string host,
     int port,
+    string image,
+    map env,
 };
 
 documentation {
     Returns a hostname/IP of the given composite endpoint
 
-    P{{Listener}} The Listner endpoint
+    P{{Container}} The Listner endpoint
     R{{}} The hostname of the endpoint
 }
-public function getHost(Listener listner) returns (string) {
-    return listner.getRemote().host;
+public function getHost(Container container) returns (string) {
+    return container.getRemote().host;
 }
 
 documentation {
     Returns the port of the given composite endpoint
 
-    P{{Listener}} The Listner endpoint
+    P{{Container}} The Listner endpoint
     R{{}} The port of the composite endpoint
 }
-public function getPort(Listener listner) returns (int) {
-    return listner.getRemote().port;
+public function getPort(Container container) returns (int) {
+    return container.getRemote().port;
 }

@@ -124,6 +124,7 @@ public class JobHandler extends AbstractArtifactHandler {
         String balxFileName = KubernetesUtils.extractBalxName(dataHolder.getBalxFilePath());
         JobModel jobModel = dataHolder.getJobModel();
         if (isBlank(jobModel.getName())) {
+            assert balxFileName != null;
             jobModel.setName(getValidName(balxFileName) + JOB_POSTFIX);
         }
         if (isBlank(jobModel.getImage())) {

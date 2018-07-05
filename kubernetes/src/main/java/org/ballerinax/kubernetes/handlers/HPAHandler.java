@@ -28,6 +28,7 @@ import org.ballerinax.kubernetes.models.PodAutoscalerModel;
 import org.ballerinax.kubernetes.utils.KubernetesUtils;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import static org.ballerinax.kubernetes.KubernetesConstants.HPA_FILE_POSTFIX;
 import static org.ballerinax.kubernetes.KubernetesConstants.HPA_POSTFIX;
@@ -78,7 +79,7 @@ public class HPAHandler extends AbstractArtifactHandler {
             podAutoscalerModel.setMinReplicas(deploymentModel.getReplicas());
         }
         if (podAutoscalerModel.getName() == null || podAutoscalerModel.getName().length() == 0) {
-            podAutoscalerModel.setName(getValidName(balxFileName) + HPA_POSTFIX);
+            podAutoscalerModel.setName(getValidName(Objects.requireNonNull(balxFileName)) + HPA_POSTFIX);
         }
         generate(podAutoscalerModel);
         OUT.println("\t@kubernetes:HPA \t\t\t - complete 1/1");
