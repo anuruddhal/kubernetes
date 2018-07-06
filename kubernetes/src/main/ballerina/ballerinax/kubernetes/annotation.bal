@@ -111,7 +111,7 @@ public type IngressConfiguration record {
 
 documentation {@kubernetes:Ingress annotation to configure ingress yaml
 }
-public annotation<service, endpoint> Ingress IngressConfiguration;
+public annotation<endpoint> Ingress IngressConfiguration;
 
 documentation {Kubernetes Horizontal Pod Autoscaler configuration
     F{{name}} - Name of the Autoscaler
@@ -130,7 +130,7 @@ public type PodAutoscalerConfig record {
 
 documentation {@kubernetes:HPA annotation to configure horizontal pod autoscaler yaml
 }
-public annotation<service> HPA PodAutoscalerConfig;
+public annotation<service, endpoint> HPA PodAutoscalerConfig;
 
 
 documentation {Kubernetes secret volume mount
@@ -155,7 +155,7 @@ public type SecretMount record {
 
 documentation {@kubernetes:Secret annotation to configure secrets
 }
-public annotation<service> Secret SecretMount;
+public annotation<service, endpoint> Secret SecretMount;
 
 documentation {Kubernetes Config Map volume mount
     F{{name}} - Name of the volume mount
@@ -181,7 +181,7 @@ public type ConfigMapMount record {
 
 documentation {@kubernetes:ConfigMap annotation to configure config maps
 }
-public annotation<service> ConfigMap ConfigMapMount;
+public annotation<service, endpoint> ConfigMap ConfigMapMount;
 
 documentation {Kubernetes Persistent Volume Claim
     F{{name}} - Name of the volume claim
@@ -207,7 +207,7 @@ public type PersistentVolumeClaims record {
 
 documentation {@kubernetes:PersistentVolumeClaim annotation to configure Persistent Volume Claims
 }
-public annotation<service> PersistentVolumeClaim PersistentVolumeClaims;
+public annotation<service, endpoint> PersistentVolumeClaim PersistentVolumeClaims;
 
 documentation {value:"Kubernetes job configuration
     F{{name}} - Name of the job

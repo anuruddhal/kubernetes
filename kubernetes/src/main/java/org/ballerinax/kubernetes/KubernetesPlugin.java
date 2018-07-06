@@ -86,10 +86,17 @@ public class KubernetesPlugin extends AbstractCompilerPlugin {
     @Override
     public void process(EndpointNode endpointNode, List<AnnotationAttachmentNode> annotations) {
         String endpointType = endpointNode.getEndPointType().getTypeName().getValue();
-        if (!endpointType.endsWith(LISTENER) && !endpointType.endsWith(CONTAINER)) {
+        if (!endpointType.endsWith(LISTENER) && !endpointType.equals(CONTAINER)) {
             dlog.logDiagnostic(Diagnostic.Kind.ERROR, endpointNode.getPosition(), "@kubernetes annotations are only " +
                     "supported with Listener/Container endpoints. Found " + endpointType);
             return;
+        }
+        if (endpointType.equals(CONTAINER)) {
+            try {
+                KubernetesContext.getInstance().getDataHolder().addEndpointToDeploymentMap(endpointNode, null);
+            } catch (KubernetesPluginException e) {
+                dlog.logDiagnostic(Diagnostic.Kind.ERROR, endpointNode.getPosition(), e.getMessage());
+            }
         }
         for (AnnotationAttachmentNode attachmentNode : annotations) {
             String annotationKey = attachmentNode.getAnnotationName().getValue();

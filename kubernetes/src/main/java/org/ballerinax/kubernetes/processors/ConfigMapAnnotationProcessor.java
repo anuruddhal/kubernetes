@@ -19,6 +19,7 @@
 package org.ballerinax.kubernetes.processors;
 
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
+import org.ballerinalang.model.tree.EndpointNode;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
 import org.ballerinax.kubernetes.models.ConfigMapModel;
@@ -44,6 +45,7 @@ import static org.ballerinax.kubernetes.KubernetesConstants.BALLERINA_CONF_MOUNT
 import static org.ballerinax.kubernetes.KubernetesConstants.BALLERINA_HOME;
 import static org.ballerinax.kubernetes.KubernetesConstants.BALLERINA_RUNTIME;
 import static org.ballerinax.kubernetes.KubernetesConstants.CONFIG_MAP_POSTFIX;
+import static org.ballerinax.kubernetes.KubernetesConstants.CONTAINER;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getValidName;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.isBlank;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.resolveValue;
@@ -55,6 +57,26 @@ public class ConfigMapAnnotationProcessor extends AbstractAnnotationProcessor {
 
     @Override
     public void processAnnotation(ServiceNode serviceNode, AnnotationAttachmentNode attachmentNode) throws
+            KubernetesPluginException {
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().setConfigMapModels
+                (processConfigMapAnnotation(serviceNode.getName().getValue(), attachmentNode));
+    }
+
+    @Override
+    public void processAnnotation(EndpointNode endpointNode, AnnotationAttachmentNode attachmentNode) throws
+            KubernetesPluginException {
+        String endpointType = endpointNode.getEndPointType().getTypeName().getValue();
+        if (!endpointType.equals(CONTAINER)) {
+            throw new KubernetesPluginException("@kubernetes:configMap{} annotation is only allowed in container " +
+                    "endpoints or services. Found " + endpointType);
+        }
+        KubernetesContext.getInstance().getDataHolder().getDeployment(endpointNode.getName().getValue())
+                .setConfigMapModels(processExternalConfigMapAnnotation(endpointNode.getName().getValue(),
+                        attachmentNode));
+    }
+
+    private Set<ConfigMapModel> processConfigMapAnnotation(String artifactName, AnnotationAttachmentNode
+            attachmentNode) throws
             KubernetesPluginException {
         Set<ConfigMapModel> configMapModels = new HashSet<>();
         List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
@@ -111,7 +133,7 @@ public class ConfigMapAnnotationProcessor extends AbstractAnnotationProcessor {
                             }
                         }
                         if (isBlank(configMapModel.getName())) {
-                            configMapModel.setName(getValidName(serviceNode.getName().getValue()) + CONFIG_MAP_POSTFIX);
+                            configMapModel.setName(getValidName(artifactName) + CONFIG_MAP_POSTFIX);
                         }
                         if (configMapModel.getData() != null && configMapModel.getData().size() > 0) {
                             configMapModels.add(configMapModel);
@@ -120,15 +142,70 @@ public class ConfigMapAnnotationProcessor extends AbstractAnnotationProcessor {
                     break;
                 case "ballerinaConf":
                     //create a new config map model with ballerina conf and add it to data holder.
-                    configMapModels.add(getBallerinaConfConfigMap(keyValue.getValue().toString(), serviceNode.getName()
-                            .getValue()));
+                    configMapModels.add(getBallerinaConfConfigMap(keyValue.getValue().toString(), artifactName));
                     break;
                 default:
                     break;
 
             }
         }
-        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().setConfigMapModels(configMapModels);
+        return configMapModels;
+    }
+
+    private Set<ConfigMapModel> processExternalConfigMapAnnotation(String artifactName, AnnotationAttachmentNode
+            attachmentNode) throws
+            KubernetesPluginException {
+        Set<ConfigMapModel> configMapModels = new HashSet<>();
+        List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
+                ((BLangRecordLiteral) ((BLangAnnotationAttachment) attachmentNode).expr).getKeyValuePairs();
+        for (BLangRecordLiteral.BLangRecordKeyValue keyValue : keyValues) {
+            String key = keyValue.getKey().toString();
+            switch (key) {
+                case "configMaps":
+                    List<BLangExpression> configAnnotation = ((BLangArrayLiteral) keyValue.valueExpr).exprs;
+                    for (BLangExpression bLangExpression : configAnnotation) {
+                        ConfigMapModel configMapModel = new ConfigMapModel();
+                        List<BLangRecordLiteral.BLangRecordKeyValue> annotationValues =
+                                ((BLangRecordLiteral) bLangExpression).getKeyValuePairs();
+                        for (BLangRecordLiteral.BLangRecordKeyValue annotation : annotationValues) {
+                            ConfigMapMountConfig volumeMountConfig =
+                                    ConfigMapMountConfig.valueOf(annotation.getKey().toString());
+                            String annotationValue = resolveValue(annotation.getValue().toString());
+                            switch (volumeMountConfig) {
+                                case name:
+                                    configMapModel.setName(getValidName(annotationValue));
+                                    break;
+                                case mountPath:
+                                    configMapModel.setMountPath(annotationValue);
+                                    break;
+                                case data:
+                                    List<BLangExpression> data = ((BLangArrayLiteral) annotation.valueExpr).exprs;
+                                    configMapModel.setData(getDataForConfigMap(data));
+                                    break;
+                                case readOnly:
+                                    configMapModel.setReadOnly(Boolean.parseBoolean(annotationValue));
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        if (isBlank(configMapModel.getName())) {
+                            configMapModel.setName(getValidName(artifactName) + CONFIG_MAP_POSTFIX);
+                        }
+                        if (configMapModel.getData() != null && configMapModel.getData().size() > 0) {
+                            configMapModels.add(configMapModel);
+                        }
+                    }
+                    break;
+                case "ballerinaConf":
+                    //TODO:FIX error
+                    throw new KubernetesPluginException("Ballerina conf is not supported here.");
+                default:
+                    break;
+
+            }
+        }
+        return configMapModels;
     }
 
     private Map<String, String> getDataForConfigMap(List<BLangExpression> data) throws KubernetesPluginException {

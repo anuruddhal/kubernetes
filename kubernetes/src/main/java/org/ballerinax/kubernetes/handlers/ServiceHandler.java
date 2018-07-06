@@ -78,18 +78,28 @@ public class ServiceHandler extends AbstractArtifactHandler {
         int count = 0;
         for (ServiceModel serviceModel : serviceModels.values()) {
             count++;
-            String balxFileName = KubernetesUtils.extractBalxName(KubernetesContext.getInstance().getDataHolder()
-                    .getBalxFilePath());
-            serviceModel.addLabel(KubernetesConstants.KUBERNETES_SELECTOR_KEY, balxFileName);
-            serviceModel.setSelector(balxFileName);
-            try {
-                String serviceYAML = generate(serviceModel);
-                KubernetesUtils.writeToFile(serviceYAML, SVC_FILE_POSTFIX + YAML);
-            } catch (IOException e) {
-                String errorMessage = "Error while generating yaml file for service: " + serviceModel.getName();
-                throw new KubernetesPluginException(errorMessage, e);
+            if (serviceModel.isExternalService()) {
+                try {
+                    String serviceYAML = generate(serviceModel);
+                    KubernetesUtils.writeToFileComposite(serviceYAML);
+                } catch (IOException e) {
+                    String errorMessage = "Error while generating yaml file for service: " + serviceModel.getName();
+                    throw new KubernetesPluginException(errorMessage, e);
+                }
+            } else {
+                String balxFileName = KubernetesUtils.extractBalxName(KubernetesContext.getInstance().getDataHolder()
+                        .getBalxFilePath());
+                serviceModel.addLabel(KubernetesConstants.KUBERNETES_SELECTOR_KEY, balxFileName);
+                serviceModel.setSelector(balxFileName);
+                try {
+                    String serviceYAML = generate(serviceModel);
+                    KubernetesUtils.writeToFile(serviceYAML, SVC_FILE_POSTFIX + YAML);
+                } catch (IOException e) {
+                    String errorMessage = "Error while generating yaml file for service: " + serviceModel.getName();
+                    throw new KubernetesPluginException(errorMessage, e);
+                }
+                deploymentModel.addPort(serviceModel.getPort());
             }
-            deploymentModel.addPort(serviceModel.getPort());
             OUT.print("\t@kubernetes:Service \t\t\t - complete " + count + "/" + serviceModels.size() + "\r");
         }
     }

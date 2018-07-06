@@ -47,8 +47,6 @@ public class AnnotationProcessorFactory {
                 return new VolumeClaimAnnotationProcessor();
             case Job:
                 return new JobAnnotationProcessor();
-            case ContainerConfig:
-                return new ContainerConfigAnnotationProcessor();
             default:
                 KubernetesContext.getInstance().getDataHolder().setCanProcess(false);
                 throw new KubernetesPluginException("Error while getting annotation processor for type: " + type);
@@ -63,7 +61,6 @@ public class AnnotationProcessorFactory {
         Secret,
         ConfigMap,
         PersistentVolumeClaim,
-        Job,
-        ContainerConfig
+        Job
     }
 }

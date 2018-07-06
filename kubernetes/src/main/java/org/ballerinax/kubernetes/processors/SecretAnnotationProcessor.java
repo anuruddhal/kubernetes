@@ -20,6 +20,7 @@ package org.ballerinax.kubernetes.processors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
+import org.ballerinalang.model.tree.EndpointNode;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
 import org.ballerinax.kubernetes.models.KubernetesContext;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.ballerinax.kubernetes.KubernetesConstants.CONTAINER;
 import static org.ballerinax.kubernetes.KubernetesConstants.SECRET_POSTFIX;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getValidName;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.isBlank;
@@ -52,6 +54,24 @@ public class SecretAnnotationProcessor extends AbstractAnnotationProcessor {
     @Override
     public void processAnnotation(ServiceNode serviceNode, AnnotationAttachmentNode attachmentNode) throws
             KubernetesPluginException {
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().addSecrets(processSecretAnnotation
+                (serviceNode.getName().getValue(), attachmentNode));
+    }
+
+    @Override
+    public void processAnnotation(EndpointNode endpointNode, AnnotationAttachmentNode attachmentNode) throws
+            KubernetesPluginException {
+        String endpointType = endpointNode.getEndPointType().getTypeName().getValue();
+        if (!endpointType.equals(CONTAINER)) {
+            throw new KubernetesPluginException("@kubernetes:Secret{} annotation is only allowed in container " +
+                    "endpoints or services. Found " + endpointType);
+        }
+        KubernetesContext.getInstance().getDataHolder().getDeployment(endpointNode.getName().getValue())
+                .setSecretModels(processSecretAnnotation(endpointNode.getName().getValue(), attachmentNode));
+    }
+
+    private Set<SecretModel> processSecretAnnotation(String artifactName, AnnotationAttachmentNode attachmentNode)
+            throws KubernetesPluginException {
         Set<SecretModel> secrets = new HashSet<>();
         List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
                 ((BLangRecordLiteral) ((BLangAnnotationAttachment) attachmentNode).expr).getKeyValuePairs();
@@ -84,12 +104,12 @@ public class SecretAnnotationProcessor extends AbstractAnnotationProcessor {
                     }
                 }
                 if (isBlank(secretModel.getName())) {
-                    secretModel.setName(getValidName(serviceNode.getName().getValue()) + SECRET_POSTFIX);
+                    secretModel.setName(getValidName(artifactName) + SECRET_POSTFIX);
                 }
                 secrets.add(secretModel);
             }
         }
-        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().addSecrets(secrets);
+        return secrets;
     }
 
     private Map<String, String> getDataForSecret(List<BLangExpression> data) throws KubernetesPluginException {

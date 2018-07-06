@@ -30,10 +30,12 @@ public class ServiceModel extends KubernetesModel {
     private String serviceType;
     private int port;
     private String selector;
+    private boolean externalService;
 
     public ServiceModel() {
         serviceType = KubernetesConstants.ServiceType.ClusterIP.name();
         labels = new HashMap<>();
+        setExternalService(false);
     }
 
     public Map<String, String> getLabels() {
@@ -81,5 +83,13 @@ public class ServiceModel extends KubernetesModel {
                 ", port=" + port +
                 ", selector='" + selector + '\'' +
                 '}';
+    }
+
+    public boolean isExternalService() {
+        return externalService;
+    }
+
+    public void setExternalService(boolean externalService) {
+        this.externalService = externalService;
     }
 }

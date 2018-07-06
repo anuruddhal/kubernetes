@@ -19,6 +19,7 @@
 package org.ballerinax.kubernetes.processors;
 
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
+import org.ballerinalang.model.tree.EndpointNode;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
 import org.ballerinax.kubernetes.models.KubernetesContext;
@@ -32,7 +33,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.ballerinax.kubernetes.KubernetesConstants.CONTAINER;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getValidName;
+import static org.ballerinax.kubernetes.utils.KubernetesUtils.isBlank;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.resolveValue;
 
 /**
@@ -40,13 +43,28 @@ import static org.ballerinax.kubernetes.utils.KubernetesUtils.resolveValue;
  */
 public class VolumeClaimAnnotationProcessor extends AbstractAnnotationProcessor {
 
-    /**
-     * Process PersistentVolumeClaim annotations.
-     *
-     * @param attachmentNode Attachment Node
-     */
+
+    @Override
+    public void processAnnotation(EndpointNode endpointNode, AnnotationAttachmentNode attachmentNode) throws
+            KubernetesPluginException {
+        String endpointType = endpointNode.getEndPointType().getTypeName().getValue();
+        if (!endpointType.equals(CONTAINER)) {
+            throw new KubernetesPluginException("@kubernetes:VolumeClaim{} annotation is only allowed in container " +
+                    "endpoints or services. Found " + endpointType);
+        }
+        KubernetesContext.getInstance().getDataHolder().getDeployment(endpointNode.getName().getValue())
+                .setVolumeClaimModels(processVolumeClaimAnnotation(attachmentNode));
+    }
+
+    @Override
     public void processAnnotation(ServiceNode serviceNode, AnnotationAttachmentNode attachmentNode) throws
             KubernetesPluginException {
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().addPersistentVolumeClaims
+                (processVolumeClaimAnnotation(attachmentNode));
+    }
+
+    private Set<PersistentVolumeClaimModel> processVolumeClaimAnnotation(AnnotationAttachmentNode attachmentNode)
+            throws KubernetesPluginException {
         Set<PersistentVolumeClaimModel> volumeClaimModels = new HashSet<>();
         List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
                 ((BLangRecordLiteral) ((BLangAnnotationAttachment) attachmentNode).expr).getKeyValuePairs();
@@ -80,11 +98,19 @@ public class VolumeClaimAnnotationProcessor extends AbstractAnnotationProcessor 
                             break;
                     }
                 }
+                if (isBlank(claimModel.getName())) {
+                    throw new KubernetesPluginException("Volume claim name cannot be empty.");
+                }
+                if (isBlank(claimModel.getMountPath())) {
+                    throw new KubernetesPluginException("Volume claim mount path cannot be empty.");
+                }
+                if (isBlank(claimModel.getVolumeClaimSize())) {
+                    throw new KubernetesPluginException("Volume claim size cannot be empty.");
+                }
                 volumeClaimModels.add(claimModel);
             }
         }
-        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().addPersistentVolumeClaims
-                (volumeClaimModels);
+        return volumeClaimModels;
     }
 
     /**

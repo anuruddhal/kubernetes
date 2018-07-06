@@ -20,6 +20,7 @@ package org.ballerinax.kubernetes.processors;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.EndpointNode;
 import org.ballerinalang.model.tree.ServiceNode;
+import org.ballerinax.kubernetes.KubernetesConstants;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
 import org.ballerinax.kubernetes.models.DeploymentModel;
 import org.ballerinax.kubernetes.models.ExternalFileModel;
@@ -33,6 +34,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.ballerinax.kubernetes.KubernetesConstants.CONTAINER;
+import static org.ballerinax.kubernetes.KubernetesConstants.DEPLOYMENT_FILE_POSTFIX;
 import static org.ballerinax.kubernetes.KubernetesConstants.DOCKER_CERT_PATH;
 import static org.ballerinax.kubernetes.KubernetesConstants.DOCKER_HOST;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getMap;
@@ -48,16 +51,24 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
     @Override
     public void processAnnotation(ServiceNode entityName, AnnotationAttachmentNode attachmentNode) throws
             KubernetesPluginException {
-        processDeployment(attachmentNode);
+        KubernetesContext.getInstance().getDataHolder().setDeploymentModel(processDeployment(attachmentNode));
     }
 
     @Override
     public void processAnnotation(EndpointNode endpointNode, AnnotationAttachmentNode attachmentNode)
             throws KubernetesPluginException {
-        processDeployment(attachmentNode);
+        String endpointType = endpointNode.getEndPointType().getTypeName().getValue();
+        if (endpointType.equals(CONTAINER)) {
+            DeploymentModel deploymentModel = processExternalDeployment(endpointNode, attachmentNode);
+            KubernetesContext.getInstance().getDataHolder().addEndpointToDeploymentMap(endpointNode, deploymentModel);
+        } else {
+            DeploymentModel deploymentModel = processDeployment(attachmentNode);
+            KubernetesContext.getInstance().getDataHolder().setDeploymentModel(deploymentModel);
+        }
     }
 
-    private void processDeployment(AnnotationAttachmentNode attachmentNode) throws KubernetesPluginException {
+    private DeploymentModel processDeployment(AnnotationAttachmentNode attachmentNode)
+            throws KubernetesPluginException {
         DeploymentModel deploymentModel = KubernetesContext.getInstance().getDataHolder().getDeploymentModel();
         List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
                 ((BLangRecordLiteral) ((BLangAnnotationAttachment) attachmentNode).expr).getKeyValuePairs();
@@ -139,7 +150,76 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
         if (!isBlank(dockerCertPath)) {
             deploymentModel.setDockerCertPath(dockerCertPath);
         }
-        KubernetesContext.getInstance().getDataHolder().setDeploymentModel(deploymentModel);
+        return deploymentModel;
+    }
+
+    private DeploymentModel processExternalDeployment(EndpointNode endpointNode, AnnotationAttachmentNode
+            attachmentNode)
+            throws KubernetesPluginException {
+        DeploymentModel deploymentModel = KubernetesContext.getInstance().getDataHolder().getDeployment(endpointNode
+                .getName().getValue());
+        List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
+                ((BLangRecordLiteral) ((BLangAnnotationAttachment) attachmentNode).expr).getKeyValuePairs();
+        for (BLangRecordLiteral.BLangRecordKeyValue keyValue : keyValues) {
+            DeploymentConfiguration deploymentConfiguration =
+                    DeploymentConfiguration.valueOf(keyValue.getKey().toString());
+            String annotationValue = resolveValue(keyValue.getValue().toString());
+            switch (deploymentConfiguration) {
+                //TODO:Validate all attributes
+                case name:
+                    deploymentModel.setName(getValidName(annotationValue));
+                    break;
+                case labels:
+                    deploymentModel.setLabels(getMap(((BLangRecordLiteral) keyValue.valueExpr).keyValuePairs));
+                    break;
+                case enableLiveness:
+                    deploymentModel.setEnableLiveness(Boolean.valueOf(annotationValue));
+                    break;
+                case livenessPort:
+                    deploymentModel.setLivenessPort(Integer.parseInt(annotationValue));
+                    break;
+                case initialDelaySeconds:
+                    deploymentModel.setInitialDelaySeconds(Integer.parseInt(annotationValue));
+                    break;
+                case periodSeconds:
+                    deploymentModel.setPeriodSeconds(Integer.parseInt(annotationValue));
+                    break;
+                case env:
+                    deploymentModel.setEnv(getMap(((BLangRecordLiteral) keyValue.valueExpr).keyValuePairs));
+                    break;
+                case image:
+                    throw new KubernetesPluginException("Attribute image is not supported for docker:Container " +
+                            "endpoint deployment");
+                case imagePullPolicy:
+                    deploymentModel.setImagePullPolicy(annotationValue);
+                    break;
+                case imagePullSecret:
+                    deploymentModel.setImagePullSecret(annotationValue);
+                    break;
+                case replicas:
+                    deploymentModel.setReplicas(Integer.parseInt(annotationValue));
+                    break;
+                case copyFiles:
+                    deploymentModel.setExternalFiles(getExternalFileMap(keyValue));
+                    break;
+                case singleYAML:
+                    deploymentModel.setSingleYAML(Boolean.valueOf(annotationValue));
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (isBlank(deploymentModel.getName())) {
+            deploymentModel.setName(getValidName(endpointNode.getName().getValue()) + DEPLOYMENT_FILE_POSTFIX);
+        }
+        deploymentModel.addLabel(KubernetesConstants.KUBERNETES_SELECTOR_KEY, getValidName(endpointNode.getName()
+                .getValue()));
+        if (deploymentModel.isEnableLiveness() && deploymentModel.getLivenessPort() == 0) {
+            throw new KubernetesPluginException("@kubernetes:Deployment{} livenessPort cannot be empty.");
+        }
+        deploymentModel.setBuildImage(false);
+        deploymentModel.setPush(false);
+        return deploymentModel;
     }
 
     private Set<ExternalFileModel> getExternalFileMap(BLangRecordLiteral.BLangRecordKeyValue keyValue) throws
@@ -188,7 +268,6 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
         periodSeconds,
         imagePullPolicy,
         imagePullSecret,
-        namespace,
         image,
         env,
         buildImage,

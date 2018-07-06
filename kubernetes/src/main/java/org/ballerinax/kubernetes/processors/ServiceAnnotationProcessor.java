@@ -32,6 +32,7 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 
 import java.util.List;
 
+import static org.ballerinax.kubernetes.KubernetesConstants.CONTAINER;
 import static org.ballerinax.kubernetes.KubernetesConstants.SVC_POSTFIX;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getMap;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getValidName;
@@ -53,8 +54,20 @@ public class ServiceAnnotationProcessor extends AbstractAnnotationProcessor {
         List<BLangRecordLiteral.BLangRecordKeyValue> endpointConfig =
                 ((BLangRecordLiteral) ((BLangEndpoint) endpointNode).configurationExpr).getKeyValuePairs();
         serviceModel.setPort(extractPort(endpointConfig));
-        KubernetesContext.getInstance().getDataHolder().addBEndpointToK8sServiceMap(endpointNode.getName().getValue()
-                , serviceModel);
+        String endpointType = endpointNode.getEndPointType().getTypeName().getValue();
+        if (endpointType.equals(CONTAINER)) {
+            String host = extractHost(endpointConfig);
+            if (host.equals("localhost")) {
+                throw new KubernetesPluginException("Host cannot be localhost");
+            }
+            serviceModel.setName(host);
+            serviceModel.setSelector(getValidName(endpointNode.getName().getValue()));
+            serviceModel.setExternalService(true);
+            serviceModel.addLabel(KubernetesConstants.KUBERNETES_SELECTOR_KEY, getValidName(endpointNode.getName()
+                    .getValue()));
+        }
+        KubernetesContext.getInstance().getDataHolder().addBEndpointToK8sServiceMap(endpointNode.getName()
+                .getValue(), serviceModel);
     }
 
     @Override
@@ -90,6 +103,17 @@ public class ServiceAnnotationProcessor extends AbstractAnnotationProcessor {
             }
         }
         throw new KubernetesPluginException("Unable to extract port from endpoint");
+    }
+
+    private String extractHost(List<BLangRecordLiteral.BLangRecordKeyValue> endpointConfig) throws
+            KubernetesPluginException {
+        for (BLangRecordLiteral.BLangRecordKeyValue keyValue : endpointConfig) {
+            String key = keyValue.getKey().toString();
+            if ("host".equals(key)) {
+                return keyValue.getValue().toString();
+            }
+        }
+        throw new KubernetesPluginException("Unable to extract host from endpoint");
     }
 
     private ServiceModel getServiceModelFromAnnotation(AnnotationAttachmentNode attachmentNode) throws

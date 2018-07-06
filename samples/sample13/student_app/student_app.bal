@@ -19,6 +19,7 @@ endpoint http:Listener student_ep {
     port: 9090
 };
 
+@kubernetes:HPA {}
 @kubernetes:Deployment {
     singleYAML: false,
     copyFiles: [

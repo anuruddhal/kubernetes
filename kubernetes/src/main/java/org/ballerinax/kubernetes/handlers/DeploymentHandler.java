@@ -184,7 +184,7 @@ public class DeploymentHandler extends AbstractArtifactHandler {
      * @param deploymentModel @{@link DeploymentModel} definition
      * @throws KubernetesPluginException If an error occurs while generating artifact.
      */
-    public String generate(DeploymentModel deploymentModel) throws KubernetesPluginException {
+    private String generate(DeploymentModel deploymentModel) throws KubernetesPluginException {
         List<ContainerPort> containerPorts = null;
         if (deploymentModel.getPorts() != null) {
             containerPorts = populatePorts(deploymentModel.getPorts());
@@ -224,6 +224,7 @@ public class DeploymentHandler extends AbstractArtifactHandler {
     public void createArtifacts() throws KubernetesPluginException {
         DeploymentModel deploymentModel = dataHolder.getDeploymentModel();
         String balxFileName = KubernetesUtils.extractBalxName(dataHolder.getBalxFilePath());
+        int size = 1 + dataHolder.getEndpointToDeploymentMap().values().size();
         if (isBlank(deploymentModel.getName())) {
             if (balxFileName != null) {
                 deploymentModel.setName(getValidName(balxFileName) + DEPLOYMENT_POSTFIX);
@@ -246,8 +247,21 @@ public class DeploymentHandler extends AbstractArtifactHandler {
             throw new KubernetesPluginException(errorMessage, e);
         }
         OUT.println();
-        OUT.println("\t@kubernetes:Deployment \t\t\t - complete 1/1");
+        OUT.print("\t@kubernetes:Deployment \t\t\t - complete 1/" + size + "\r");
         dataHolder.setDockerModel(getDockerModel(deploymentModel));
+        int i = 1;
+        for (DeploymentModel externalDeploymentModel : dataHolder.getEndpointToDeploymentMap().values()) {
+            String deploymentContent = generate(externalDeploymentModel);
+            try {
+                i++;
+                KubernetesUtils.writeToFileComposite(deploymentContent);
+                OUT.print("\t@kubernetes:Deployment \t\t\t - complete " + i + "/" + size + "\r");
+            } catch (IOException e) {
+                String errorMessage = "Error while generating yaml file for deployment: " + deploymentModel.getName();
+                throw new KubernetesPluginException(errorMessage, e);
+            }
+        }
+        OUT.println();
     }
 
 

@@ -213,6 +213,10 @@ public class DeploymentModel extends KubernetesModel {
         env.put(key, value);
     }
 
+    public void addEnv(Map<String, String> envMap) {
+        env.putAll(envMap);
+    }
+
 
     public PodAutoscalerModel getPodAutoscalerModel() {
         return podAutoscalerModel;

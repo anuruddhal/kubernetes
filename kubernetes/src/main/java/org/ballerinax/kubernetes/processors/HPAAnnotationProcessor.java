@@ -19,6 +19,7 @@
 package org.ballerinax.kubernetes.processors;
 
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
+import org.ballerinalang.model.tree.EndpointNode;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
 import org.ballerinax.kubernetes.models.KubernetesContext;
@@ -28,6 +29,7 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 
 import java.util.List;
 
+import static org.ballerinax.kubernetes.KubernetesConstants.CONTAINER;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getMap;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getValidName;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.resolveValue;
@@ -39,6 +41,24 @@ public class HPAAnnotationProcessor extends AbstractAnnotationProcessor {
 
     @Override
     public void processAnnotation(ServiceNode serviceNode, AnnotationAttachmentNode attachmentNode) throws
+            KubernetesPluginException {
+        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().setPodAutoscalerModel(processAnnotation
+                (attachmentNode));
+    }
+
+    @Override
+    public void processAnnotation(EndpointNode endpointNode, AnnotationAttachmentNode attachmentNode) throws
+            KubernetesPluginException {
+        String endpointType = endpointNode.getEndPointType().getTypeName().getValue();
+        if (!endpointType.equals(CONTAINER)) {
+            throw new KubernetesPluginException("@kubernetes:HPA{} annotation is only allowed in container " +
+                    "endpoints or services. Found " + endpointType);
+        }
+        KubernetesContext.getInstance().getDataHolder().getDeployment(endpointNode.getName().getValue())
+                .setPodAutoscalerModel(processAnnotation(attachmentNode));
+    }
+
+    private PodAutoscalerModel processAnnotation(AnnotationAttachmentNode attachmentNode) throws
             KubernetesPluginException {
         PodAutoscalerModel podAutoscalerModel = new PodAutoscalerModel();
         List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
@@ -67,7 +87,7 @@ public class HPAAnnotationProcessor extends AbstractAnnotationProcessor {
                     break;
             }
         }
-        KubernetesContext.getInstance().getDataHolder().getDeploymentModel().setPodAutoscalerModel(podAutoscalerModel);
+        return podAutoscalerModel;
     }
 
     /**

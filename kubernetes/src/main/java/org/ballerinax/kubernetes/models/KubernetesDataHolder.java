@@ -18,12 +18,19 @@
 
 package org.ballerinax.kubernetes.models;
 
-import org.ballerinax.kubernetes.KubernetesConstants;
+import org.ballerinalang.model.tree.EndpointNode;
+import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
+import org.wso2.ballerinalang.compiler.tree.BLangEndpoint;
+import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.ballerinax.kubernetes.utils.KubernetesUtils.getMap;
+import static org.ballerinax.kubernetes.utils.KubernetesUtils.isBlank;
 
 /**
  * Class to store kubernetes models.
@@ -39,13 +46,15 @@ public class KubernetesDataHolder {
     private JobModel jobModel;
     private String balxFilePath;
     private String outputDir;
+    private Map<String, DeploymentModel> endpointToDeploymentMap;
 
     KubernetesDataHolder() {
         this.bEndpointToK8sServiceMap = new HashMap<>();
         this.endpointToSecretMap = new HashMap<>();
         this.ingressModelSet = new HashSet<>();
         this.endpointToContainerModelMap = new HashMap<>();
-        this.deploymentModel = getDefaultDeploymentModel();
+        this.deploymentModel = new DeploymentModel();
+        this.endpointToDeploymentMap = new HashMap<>();
     }
 
     public DeploymentModel getDeploymentModel() {
@@ -143,21 +152,45 @@ public class KubernetesDataHolder {
         return this.endpointToContainerModelMap;
     }
 
-    /**
-     * Get DeploymentModel object with default values.
-     *
-     * @return DeploymentModel object with default values
-     */
-    private DeploymentModel getDefaultDeploymentModel() {
-        DeploymentModel deploymentModel = new DeploymentModel();
-        deploymentModel.setImagePullPolicy(KubernetesConstants.DEPLOYMENT_IMAGE_PULL_POLICY_DEFAULT);
-        deploymentModel.setEnableLiveness(KubernetesConstants.DEPLOYMENT_LIVENESS_DISABLE);
-        int defaultReplicas = 1;
-        deploymentModel.setReplicas(defaultReplicas);
-        deploymentModel.setEnv(new HashMap<>());
-        deploymentModel.setBuildImage(true);
-        deploymentModel.setPush(false);
+    public Map<String, DeploymentModel> getEndpointToDeploymentMap() {
+        return endpointToDeploymentMap;
+    }
 
+    public DeploymentModel getDeployment(String endpointName) {
+        return endpointToDeploymentMap.get(endpointName);
+    }
+
+    public void addEndpointToDeploymentMap(EndpointNode endpointNode, DeploymentModel deploymentModel) throws
+            KubernetesPluginException {
+        if (deploymentModel == null) {
+            deploymentModel = getExternalDeployment(endpointNode);
+        }
+        this.endpointToDeploymentMap.put(endpointNode.getName().getValue(), deploymentModel);
+    }
+
+    private DeploymentModel getExternalDeployment(EndpointNode endpointNode) throws KubernetesPluginException {
+        DeploymentModel deploymentModel = new DeploymentModel();
+        List<BLangRecordLiteral.BLangRecordKeyValue> endpointConfig =
+                ((BLangRecordLiteral) ((BLangEndpoint) endpointNode).configurationExpr).getKeyValuePairs();
+        for (BLangRecordLiteral.BLangRecordKeyValue keyValue : endpointConfig) {
+            String key = keyValue.getKey().toString();
+            if ("port".equals(key)) {
+                try {
+                    deploymentModel.addPort(Integer.parseInt(keyValue.getValue().toString()));
+                } catch (NumberFormatException e) {
+                    throw new KubernetesPluginException("Endpoint port must be an integer to use " +
+                            "@kubernetes annotations.");
+                }
+            } else if ("image".equals(key)) {
+                deploymentModel.setImage(keyValue.getValue().toString());
+            } else if ("env".equals(key)) {
+                deploymentModel.addEnv(getMap(((BLangRecordLiteral) keyValue.valueExpr).keyValuePairs));
+            }
+        }
+        if (isBlank(deploymentModel.getImage())) {
+            throw new KubernetesPluginException("image is not defined in the endpoint " + endpointNode
+                    .getName().getValue());
+        }
         return deploymentModel;
     }
 }
