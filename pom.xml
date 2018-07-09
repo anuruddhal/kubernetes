@@ -131,6 +131,7 @@
     <modules>
         <module>kubernetes</module>
         <module>composite</module>
+        <module>ballerinax-unit-test</module>
     </modules>
 
     <properties>
