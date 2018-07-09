@@ -18,7 +18,6 @@
 
 package org.ballerinax.kubernetes.handlers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.fabric8.kubernetes.api.model.HorizontalPodAutoscaler;
 import io.fabric8.kubernetes.api.model.HorizontalPodAutoscalerBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;

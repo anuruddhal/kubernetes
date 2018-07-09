@@ -27,7 +27,8 @@ endpoint http:Listener student_ep {
             target: "/ballerina/runtime/bre/lib",
             source: "./conf/mysql-connector-java-5.1.46.jar"
         }
-    ]
+    ],
+    dependsOn: ["mysql-svc"]
 }
 @http:ServiceConfig {
     basePath: "/students"

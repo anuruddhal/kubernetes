@@ -2,10 +2,17 @@ import ballerinax/docker;
 import ballerina/io;
 import ballerinax/kubernetes;
 
-@kubernetes:Service{
+@kubernetes:Service {
+    serviceType: "NodePort"
 }
-@kubernetes:Deployment{
-    name:"mysql-deployment"
+@kubernetes:Deployment {
+}
+@kubernetes:Secret {
+    secrets: [
+        { name: "private", mountPath: "/tmp/mysecret",
+            data: ["./secrets/MySecret1.txt"]
+        }
+    ]
 }
 endpoint docker:Container mysql_ep {
     port: 3306,

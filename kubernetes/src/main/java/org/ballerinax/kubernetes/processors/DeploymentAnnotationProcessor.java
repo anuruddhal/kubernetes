@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.ballerinax.kubernetes.KubernetesConstants.CONTAINER;
-import static org.ballerinax.kubernetes.KubernetesConstants.DEPLOYMENT_FILE_POSTFIX;
+import static org.ballerinax.kubernetes.KubernetesConstants.DEPLOYMENT_POSTFIX;
 import static org.ballerinax.kubernetes.KubernetesConstants.DOCKER_CERT_PATH;
 import static org.ballerinax.kubernetes.KubernetesConstants.DOCKER_HOST;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getMap;
@@ -137,6 +137,9 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
                 case singleYAML:
                     deploymentModel.setSingleYAML(Boolean.valueOf(annotationValue));
                     break;
+                case dependsOn:
+                    deploymentModel.setDependsOn(getDependsOn(keyValue));
+                    break;
                 default:
                     break;
             }
@@ -210,7 +213,7 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
             }
         }
         if (isBlank(deploymentModel.getName())) {
-            deploymentModel.setName(getValidName(endpointNode.getName().getValue()) + DEPLOYMENT_FILE_POSTFIX);
+            deploymentModel.setName(getValidName(endpointNode.getName().getValue()) + DEPLOYMENT_POSTFIX);
         }
         deploymentModel.addLabel(KubernetesConstants.KUBERNETES_SELECTOR_KEY, getValidName(endpointNode.getName()
                 .getValue()));
@@ -252,7 +255,15 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
             externalFiles.add(externalFileModel);
         }
         return externalFiles;
+    }
 
+    private Set<String> getDependsOn(BLangRecordLiteral.BLangRecordKeyValue keyValue) throws KubernetesPluginException {
+        Set<String> dependsOnList = new HashSet<>();
+        List<BLangExpression> configAnnotation = ((BLangArrayLiteral) keyValue.valueExpr).exprs;
+        for (BLangExpression bLangExpression : configAnnotation) {
+            dependsOnList.add(bLangExpression.toString());
+        }
+        return dependsOnList;
     }
 
     /**
@@ -278,6 +289,7 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
         push,
         dockerCertPath,
         copyFiles,
-        singleYAML
+        singleYAML,
+        dependsOn
     }
 }

@@ -120,6 +120,22 @@ public class DeploymentHandler extends AbstractArtifactHandler {
                 .build();
     }
 
+    private List<Container> generateInitContainer(DeploymentModel deploymentModel) {
+        List<Container> initContainers = new ArrayList<>();
+        for (String dependsOn : deploymentModel.getDependsOn()) {
+            List<String> commands = new ArrayList<>();
+            commands.add("sh");
+            commands.add("-c");
+            commands.add("until nslookup " + dependsOn + "; do echo waiting for mysql-svc; sleep 2; done;");
+            initContainers.add(new ContainerBuilder()
+                    .withName("wait-for-" + dependsOn)
+                    .withImage("busybox")
+                    .withCommand(commands)
+                    .build());
+        }
+        return initContainers;
+    }
+
     private List<EnvVar> populateEnvVar(Map<String, String> envMap) {
         List<EnvVar> envVars = new ArrayList<>();
         if (envMap == null) {
@@ -207,6 +223,7 @@ public class DeploymentHandler extends AbstractArtifactHandler {
                 .withContainers(container)
                 .withVolumes(populateVolume(deploymentModel))
                 .withImagePullSecrets(imagePullSecret)
+                .withInitContainers(generateInitContainer(deploymentModel))
                 .endSpec()
                 .endTemplate()
                 .endSpec()

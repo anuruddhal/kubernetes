@@ -22,6 +22,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
+import org.ballerinax.kubernetes.models.DeploymentModel;
 import org.ballerinax.kubernetes.models.SecretModel;
 import org.ballerinax.kubernetes.utils.KubernetesUtils;
 
@@ -59,6 +60,9 @@ public class SecretHandler extends AbstractArtifactHandler {
         //secret
         int count = 0;
         Collection<SecretModel> secretModels = dataHolder.getDeploymentModel().getSecretModels();
+        for (DeploymentModel deploymentModel : dataHolder.getEndpointToDeploymentMap().values()) {
+            secretModels.addAll(deploymentModel.getSecretModels());
+        }
         if (secretModels.size() > 0) {
             OUT.println();
         }
@@ -67,7 +71,6 @@ public class SecretHandler extends AbstractArtifactHandler {
             generate(secretModel);
             OUT.print("\t@kubernetes:Secret \t\t\t - complete " + count + "/" + secretModels.size() + "\r");
         }
-
     }
 
 }

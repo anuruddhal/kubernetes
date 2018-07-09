@@ -41,6 +41,7 @@ documentation {Kubernetes deployment configuration
     F{{baseImage}} - Base image for docker image building
     F{{push}} - Push to remote registry
     F{{dockerCertPath}} - Docker certificate path
+    F{{dependsOn}} - Deployment names this container depends on
     F{{copyFiles}} - Array of [External files](kubernetes#FileConfig) for docker image
     F{{singleYAML}} - Generate a single yaml file with all kubernetes artifacts (services,deployment,ingress,)
 }
@@ -62,6 +63,7 @@ public type DeploymentConfiguration record {
     string baseImage;
     boolean push;
     string dockerCertPath;
+    string[] dependsOn;
     FileConfig[] copyFiles;
     boolean singleYAML;
 };
