@@ -24,6 +24,7 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.QuantityBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
+import org.ballerinax.kubernetes.models.DeploymentModel;
 import org.ballerinax.kubernetes.models.PersistentVolumeClaimModel;
 import org.ballerinax.kubernetes.utils.KubernetesUtils;
 
@@ -72,6 +73,9 @@ public class PersistentVolumeClaimHandler extends AbstractArtifactHandler {
     public void createArtifacts() throws KubernetesPluginException {
         int count = 0;
         Collection<PersistentVolumeClaimModel> volumeClaims = dataHolder.getDeploymentModel().getVolumeClaimModels();
+        for (DeploymentModel deploymentModel : dataHolder.getEndpointToDeploymentMap().values()) {
+            volumeClaims.addAll(deploymentModel.getVolumeClaimModels());
+        }
         if (volumeClaims.size() > 0) {
             OUT.println();
         }

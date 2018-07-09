@@ -62,6 +62,9 @@ public class ConfigMapHandler extends AbstractArtifactHandler {
         //configMap
         int count = 0;
         Collection<ConfigMapModel> configMapModels = dataHolder.getDeploymentModel().getConfigMapModels();
+        for (DeploymentModel deploymentModel : dataHolder.getEndpointToDeploymentMap().values()) {
+            configMapModels.addAll(deploymentModel.getConfigMapModels());
+        }
         if (configMapModels.size() > 0) {
             OUT.println();
         }

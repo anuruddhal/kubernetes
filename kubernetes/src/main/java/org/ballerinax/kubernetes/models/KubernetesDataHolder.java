@@ -19,6 +19,7 @@
 package org.ballerinax.kubernetes.models;
 
 import org.ballerinalang.model.tree.EndpointNode;
+import org.ballerinax.kubernetes.KubernetesConstants;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
 import org.wso2.ballerinalang.compiler.tree.BLangEndpoint;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getMap;
+import static org.ballerinax.kubernetes.utils.KubernetesUtils.getValidName;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.isBlank;
 
 /**
@@ -67,21 +69,6 @@ public class KubernetesDataHolder {
 
     public Map<String, Set<SecretModel>> getSecretModels() {
         return endpointToSecretMap;
-    }
-
-    public void addCompositeServiceModel(String endpointName, ServiceModel serviceModel) {
-        //Add map with service model
-        CompositeContainerModel containerModel = new CompositeContainerModel();
-        containerModel.setServiceModel(serviceModel);
-        this.endpointToContainerModelMap.put(endpointName, containerModel);
-    }
-
-    public void addCompositeDeploymentModel(String endpointName, DeploymentModel deploymentModel) {
-        //Update the map with deployment model
-        CompositeContainerModel containerModel = this.endpointToContainerModelMap.get(endpointName);
-        deploymentModel.addPort(containerModel.getServiceModel().getPort());
-        containerModel.setDeploymentModel(deploymentModel);
-        this.endpointToContainerModelMap.put(endpointName, containerModel);
     }
 
     public void addEndpointSecret(String endpointName, Set<SecretModel> secretModel) {
@@ -191,6 +178,9 @@ public class KubernetesDataHolder {
             throw new KubernetesPluginException("image is not defined in the endpoint " + endpointNode
                     .getName().getValue());
         }
+        deploymentModel.setName(getValidName(endpointNode.getName().getValue()));
+        deploymentModel.addLabel(KubernetesConstants.KUBERNETES_SELECTOR_KEY, getValidName(endpointNode.getName()
+                .getValue()));
         return deploymentModel;
     }
 }

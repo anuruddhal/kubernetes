@@ -15,6 +15,9 @@ endpoint jdbc:Client testDB {
 @kubernetes:Service {
     serviceType: "NodePort"
 }
+@kubernetes:Ingress {
+    hostname:"abc.com"
+}
 endpoint http:Listener student_ep {
     port: 9090
 };
@@ -28,7 +31,7 @@ endpoint http:Listener student_ep {
             source: "./conf/mysql-connector-java-5.1.46.jar"
         }
     ],
-    dependsOn: ["mysql-svc"]
+    dependsOn: ["mysql-svc","twenty-forty"]
 }
 @http:ServiceConfig {
     basePath: "/students"

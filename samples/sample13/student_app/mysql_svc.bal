@@ -7,11 +7,10 @@ import ballerinax/kubernetes;
 }
 @kubernetes:Deployment {
 }
-@kubernetes:Secret {
-    secrets: [
-        { name: "private", mountPath: "/tmp/mysecret",
-            data: ["./secrets/MySecret1.txt"]
-        }
+@kubernetes:PersistentVolumeClaim {
+    volumeClaims: [
+        { name: "local-pv-2", mountPath: "/tmp/pvc", readOnly: false, accessMode: "ReadWriteOnce", volumeClaimSize
+        : "1Gi" }
     ]
 }
 endpoint docker:Container mysql_ep {
