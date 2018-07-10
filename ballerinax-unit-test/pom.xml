@@ -16,7 +16,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>org.ballerinax.kubernetes</groupId>
         <artifactId>kubernetes-extension-parent</artifactId>
@@ -35,6 +36,11 @@
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-config</artifactId>
+            <version>${ballerina.lang.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinax.kubernetes</groupId>
+            <artifactId>kubernetes-extension</artifactId>
             <version>${ballerina.lang.version}</version>
         </dependency>
         <dependency>
@@ -408,14 +414,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>-Dfile.encoding=UTF-8 ${jacoco.agent.argLine}</argLine>
-                    <environmentVariables>
-                        <testEnvironmentVariable>EnvironmentVariable</testEnvironmentVariable>
-                        <user_name>b7auser</user_name>
-                        <password>b7apw</password>
-                        <hello_http_port>5656</hello_http_port>
-                        <hello_cache_enabled>true</hello_cache_enabled>
-                        <hello_eviction_fac>0.2333333</hello_eviction_fac>
-                    </environmentVariables>
                     <systemPropertyVariables>
                         <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties
                         </java.util.logging.config.file>
@@ -427,7 +425,8 @@
                     </suiteXmlFiles>
                     <classpathDependencyExcludes>
                         <classpathDependencyExcludes>org.slf4j:slf4j-log4j12</classpathDependencyExcludes>
-                        <classpathDependencyExcludes>org.codehaus.woodstox:woodstox-core-asl</classpathDependencyExcludes>
+                        <classpathDependencyExcludes>org.codehaus.woodstox:woodstox-core-asl
+                        </classpathDependencyExcludes>
                         <classpathDependencyExcludes>org.codehaus.woodstox:stax2-api</classpathDependencyExcludes>
                     </classpathDependencyExcludes>
                 </configuration>

@@ -25,8 +25,6 @@ public class KubernetesConstants {
     public static final String ENABLE_DEBUG_LOGS = "debugKubernetes";
     public static final String KUBERNETES_SVC_PROTOCOL = "TCP";
     public static final String KUBERNETES_SELECTOR_KEY = "app";
-    public static final String DEPLOYMENT_IMAGE_PULL_POLICY_DEFAULT = "IfNotPresent";
-    public static final boolean DEPLOYMENT_LIVENESS_DISABLE = false;
     public static final String INGRESS_POSTFIX = "-ingress";
     public static final String ANONYMOUS_POSTFIX = "-anonymous";
     public static final String INGRESS_FILE_POSTFIX = "_ingress";
@@ -34,7 +32,6 @@ public class KubernetesConstants {
     public static final String SVC_POSTFIX = "-svc";
     public static final String CONFIG_MAP_POSTFIX = "-config-map";
     public static final String SECRET_POSTFIX = "-secret";
-    public static final String HPA = "hpa";
     public static final String DOCKER = "docker";
     public static final String BALX = ".balx";
     public static final String DEPLOYMENT_POSTFIX = "-deployment";
@@ -49,7 +46,6 @@ public class KubernetesConstants {
     public static final String HPA_FILE_POSTFIX = "_hpa";
     public static final String YAML = ".yaml";
     public static final String DOCKER_LATEST_TAG = ":latest";
-    public static final String LISTENER = "Listener";
     public static final String CONTAINER = "Container";
     public static final String BALLERINA_HOME = "/home/ballerina";
     public static final String BALLERINA_RUNTIME = "/ballerina/runtime";

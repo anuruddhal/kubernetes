@@ -41,7 +41,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.ballerinax.kubernetes.KubernetesConstants.CONTAINER;
-import static org.ballerinax.kubernetes.KubernetesConstants.LISTENER;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.extractBalxName;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.printError;
 
@@ -57,6 +56,7 @@ import static org.ballerinax.kubernetes.utils.KubernetesUtils.printError;
 )
 public class KubernetesPlugin extends AbstractCompilerPlugin {
     private DiagnosticLog dlog;
+    private static final String LISTENER = "Listener";
 
     @Override
     public void init(DiagnosticLog diagnosticLog) {
