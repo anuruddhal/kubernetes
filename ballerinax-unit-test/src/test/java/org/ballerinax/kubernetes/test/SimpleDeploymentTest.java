@@ -20,6 +20,7 @@ package org.ballerinax.kubernetes.test;
 
 import org.ballerinalang.launcher.util.BCompileUtil;
 import org.ballerinalang.launcher.util.CompileResult;
+import org.ballerinax.kubernetes.KubernetesPlugin;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
