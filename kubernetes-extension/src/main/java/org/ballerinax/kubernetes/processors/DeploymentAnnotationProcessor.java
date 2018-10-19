@@ -59,13 +59,13 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
             throws KubernetesPluginException {
         processDeployment(attachmentNode);
     }
-    
+
     @Override
     public void processAnnotation(FunctionNode functionNode, AnnotationAttachmentNode attachmentNode) throws
             KubernetesPluginException {
         processDeployment(attachmentNode);
     }
-    
+
     private void processDeployment(AnnotationAttachmentNode attachmentNode) throws KubernetesPluginException {
         DeploymentModel deploymentModel = new DeploymentModel();
         List<BLangRecordLiteral.BLangRecordKeyValue> keyValues =
@@ -83,6 +83,9 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
                     break;
                 case labels:
                     deploymentModel.setLabels(getMap(((BLangRecordLiteral) keyValue.valueExpr).keyValuePairs));
+                    break;
+                case annotations:
+                    deploymentModel.setAnnotations(getMap(((BLangRecordLiteral) keyValue.valueExpr).keyValuePairs));
                     break;
                 case enableLiveness:
                     deploymentModel.setEnableLiveness(Boolean.valueOf(annotationValue));
@@ -174,6 +177,7 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
         name,
         namespace,
         labels,
+        annotations,
         replicas,
         enableLiveness,
         livenessPort,

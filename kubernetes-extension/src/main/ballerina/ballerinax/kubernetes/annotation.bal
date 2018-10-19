@@ -98,6 +98,7 @@ public type ConfigMapKeyRef record {
 # + name - Name of the deployment
 # + namespace - Kubernetes namespace
 # + labels - Map of labels for deployment
+# + labels - Map of annotations for deployment
 # + replicas - Number of replicas
 # + enableLiveness - Enable/Disable liveness probe
 # + livenessPort - Port to check the liveness
@@ -121,6 +122,7 @@ public type DeploymentConfiguration record {
     string name;
     string namespace;
     map labels;
+    map annotations;
     int replicas;
     boolean enableLiveness;
     int livenessPort;
