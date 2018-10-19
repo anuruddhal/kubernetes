@@ -43,21 +43,22 @@ public class MainFunctionDeploymentTest {
             .toAbsolutePath().toString();
     private final String targetPath = Paths.get(balDirectory).resolve(KUBERNETES).toString();
     private final String dockerImage = "main-function:latest";
-    
+
     /**
      * Build bal file with deployment having name value environment variables.
-     * @throws IOException Error when loading the generated yaml.
-     * @throws InterruptedException Error when compiling the ballerina file.
+     *
+     * @throws IOException               Error when loading the generated yaml.
+     * @throws InterruptedException      Error when compiling the ballerina file.
      * @throws KubernetesPluginException Error when deleting the generated artifacts folder.
      */
     @Test
     public void nameValueTest() throws IOException, InterruptedException, KubernetesPluginException {
         Assert.assertEquals(KubernetesTestUtils.compileBallerinaFile(balDirectory, "main-function.bal"), 0);
-        
+
         // Check if docker image exists and correct
         validateDockerfile();
         validateDockerImage();
-        
+
         // Validate deployment yaml
         File deploymentYAML = Paths.get(targetPath).resolve("main-function_deployment.yaml").toFile();
         Assert.assertTrue(deploymentYAML.exists());
@@ -65,11 +66,19 @@ public class MainFunctionDeploymentTest {
         Assert.assertEquals(deployment.getMetadata().getLabels().size(), 2, "Unmatching number of labels found.");
         Assert.assertEquals(deployment.getMetadata().getLabels().get("app"), "main-function", "Invalid label found.");
         Assert.assertEquals(deployment.getMetadata().getLabels().get("task_type"), "printer", "Invalid label found.");
-        
+
+        Assert.assertEquals(deployment.getMetadata().getAnnotations().size(), 3, "Unmatching number of annotations " +
+                "found.");
+        Assert.assertEquals(deployment.getMetadata().getAnnotations().get("prometheus.io/scrape"), "true", "Invalid " +
+                "label found.");
+        Assert.assertEquals(deployment.getMetadata().getAnnotations().get("prometheus.io/port"), "9797", "Invalid " +
+                "label found.");
+        Assert.assertEquals(deployment.getMetadata().getAnnotations().get("prometheus.io/path"), "/metrics", "Invalid" +
+                " label found.");
         KubernetesUtils.deleteDirectory(targetPath);
         KubernetesTestUtils.deleteDockerImage(dockerImage);
     }
-    
+
     /**
      * Validate if Dockerfile is created.
      */
@@ -77,7 +86,7 @@ public class MainFunctionDeploymentTest {
         File dockerFile = new File(targetPath + File.separator + DOCKER + File.separator + "Dockerfile");
         Assert.assertTrue(dockerFile.exists());
     }
-    
+
     /**
      * Validate contents of the Dockerfile.
      */

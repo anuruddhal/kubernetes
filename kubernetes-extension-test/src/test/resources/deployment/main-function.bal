@@ -20,6 +20,11 @@ import ballerinax/kubernetes;
 @kubernetes:Deployment {
     labels: {
         "task_type": "printer"
+    },
+    annotations: {
+        "prometheus.io/scrape": "true",
+        "prometheus.io/path": "/metrics",
+        "prometheus.io/port": "9797"
     }
 }
 public function main(string... args) {
