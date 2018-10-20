@@ -274,6 +274,21 @@ public class KubernetesUtils {
     }
 
     /**
+     * Generate map by splitting keyValues.
+     *
+     * @param keyValues key value paris.
+     * @return Map of key values.
+     */
+    public static Map<String, Integer> getPortMap(List<BLangRecordLiteral.BLangRecordKeyValue> keyValues) {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        if (keyValues != null) {
+            keyValues.forEach(keyValue -> map.put(keyValue.getKey().toString(),
+                    Integer.parseInt(keyValue.getValue().toString())));
+        }
+        return map;
+    }
+
+    /**
      * Returns valid kubernetes name.
      *
      * @param name actual value

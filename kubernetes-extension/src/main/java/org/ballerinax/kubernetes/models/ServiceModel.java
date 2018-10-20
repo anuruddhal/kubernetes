@@ -20,22 +20,25 @@ package org.ballerinax.kubernetes.models;
 import org.ballerinax.kubernetes.KubernetesConstants;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Kubernetes service annotations model class.
  */
 public class ServiceModel extends KubernetesModel {
-    
+
     private Map<String, String> labels;
     private String serviceType;
     private int port;
+    private Map<String, Integer> additionalPorts;
     private String selector;
     private String sessionAffinity;
 
     public ServiceModel() {
         serviceType = KubernetesConstants.ServiceType.ClusterIP.name();
         labels = new HashMap<>();
+        this.additionalPorts = new LinkedHashMap<>();
     }
 
     public Map<String, String> getLabels() {
@@ -73,24 +76,32 @@ public class ServiceModel extends KubernetesModel {
     public void setSelector(String selector) {
         this.selector = selector;
     }
-    
+
     public String getSessionAffinity() {
         return sessionAffinity;
     }
-    
+
     public void setSessionAffinity(String sessionAffinity) {
         this.sessionAffinity = sessionAffinity;
     }
-    
+
     @Override
     public String toString() {
         return "ServiceModel{" +
-               "name='" + getName() + '\'' +
-               ", labels=" + labels +
-               ", serviceType='" + serviceType + '\'' +
-               ", sessionAffinity='" + sessionAffinity + '\'' +
-               ", port=" + port +
-               ", selector='" + selector + '\'' +
-               '}';
+                "name='" + getName() + '\'' +
+                ", labels=" + labels +
+                ", serviceType='" + serviceType + '\'' +
+                ", sessionAffinity='" + sessionAffinity + '\'' +
+                ", port=" + port +
+                ", selector='" + selector + '\'' +
+                '}';
+    }
+
+    public Map<String, Integer> getAdditionalPorts() {
+        return additionalPorts;
+    }
+
+    public void setAdditionalPorts(Map<String, Integer> additionalPorts) {
+        this.additionalPorts = additionalPorts;
     }
 }

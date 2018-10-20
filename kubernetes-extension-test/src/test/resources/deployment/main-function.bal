@@ -25,6 +25,9 @@ import ballerinax/kubernetes;
         "prometheus.io/scrape": "true",
         "prometheus.io/path": "/metrics",
         "prometheus.io/port": "9797"
+    },
+    additionalPorts: {
+        "prometheus": 9797
     }
 }
 public function main(string... args) {

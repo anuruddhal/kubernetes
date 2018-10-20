@@ -34,6 +34,7 @@ import static org.ballerinax.kubernetes.KubernetesConstants.WINDOWS_DEFAULT_DOCK
 public class DeploymentModel extends KubernetesModel {
     private Map<String, String> labels;
     private Map<String, String> annotations;
+    private Map<String, Integer> additionalPorts;
     private int replicas;
     private boolean enableLiveness;
     private int livenessPort;
@@ -70,8 +71,9 @@ public class DeploymentModel extends KubernetesModel {
         String baseImageVersion = getClass().getPackage().getImplementationVersion();
         this.baseImage = "ballerina/ballerina:" + baseImageVersion;
         this.push = false;
+        this.additionalPorts = new LinkedHashMap<>();
         this.labels = new LinkedHashMap<>();
-        this.setAnnotations(new LinkedHashMap<>());
+        this.annotations = new LinkedHashMap<>();
         this.env = new LinkedHashMap<>();
         this.imagePullPolicy = KubernetesConstants.ImagePullPolicy.IfNotPresent.name();
         this.dependsOn = new HashSet<>();
@@ -337,5 +339,13 @@ public class DeploymentModel extends KubernetesModel {
 
     public void setAnnotations(Map<String, String> annotations) {
         this.annotations = annotations;
+    }
+
+    public Map<String, Integer> getAdditionalPorts() {
+        return additionalPorts;
+    }
+
+    public void setAdditionalPorts(Map<String, Integer> additionalPorts) {
+        this.additionalPorts = additionalPorts;
     }
 }

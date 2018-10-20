@@ -99,6 +99,7 @@ public type ConfigMapKeyRef record {
 # + namespace - Kubernetes namespace
 # + labels - Map of labels for deployment
 # + annotations - Map of annotations for deployment
+# + additionalPorts - Map of external ports for deployment
 # + replicas - Number of replicas
 # + enableLiveness - Enable/Disable liveness probe
 # + livenessPort - Port to check the liveness
@@ -123,6 +124,7 @@ public type DeploymentConfiguration record {
     string namespace;
     map labels;
     map annotations;
+    map<int> additionalPorts;
     int replicas;
     boolean enableLiveness;
     int livenessPort;
@@ -164,11 +166,13 @@ public type ServiceType "NodePort"|"ClusterIP"|"LoadBalancer";
 #
 # + name - Name of the service
 # + labels - Map of labels for deployment
+# + additionalPorts - Map of external ports for deployment
 # + sessionAffinity - Session affinity for pods
 # + serviceType - Service type of the service
 public type ServiceConfiguration record {
     string name;
     map labels;
+    map<int> additionalPorts;
     SessionAffinity sessionAffinity;
     ServiceType serviceType;
 };

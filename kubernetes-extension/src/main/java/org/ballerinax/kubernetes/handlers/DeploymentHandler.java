@@ -49,7 +49,6 @@ import org.ballerinax.kubernetes.utils.KubernetesUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static org.ballerinax.kubernetes.KubernetesConstants.BALX;
 import static org.ballerinax.kubernetes.KubernetesConstants.DEPLOYMENT_FILE_POSTFIX;
@@ -61,15 +60,23 @@ import static org.ballerinax.kubernetes.utils.KubernetesUtils.populateEnvVar;
  */
 public class DeploymentHandler extends AbstractArtifactHandler {
 
-    private List<ContainerPort> populatePorts(Set<Integer> ports) {
+    private List<ContainerPort> populatePorts(DeploymentModel deploymentModel) {
         List<ContainerPort> containerPorts = new ArrayList<>();
-        for (int port : ports) {
+        for (int port : deploymentModel.getPorts()) {
             ContainerPort containerPort = new ContainerPortBuilder()
                     .withContainerPort(port)
                     .withProtocol(KubernetesConstants.KUBERNETES_SVC_PROTOCOL)
                     .build();
             containerPorts.add(containerPort);
         }
+        deploymentModel.getAdditionalPorts().forEach((name, port) -> {
+            ContainerPort containerPort = new ContainerPortBuilder()
+                    .withContainerPort(port)
+                    .withName(name)
+                    .withProtocol(KubernetesConstants.KUBERNETES_SVC_PROTOCOL)
+                    .build();
+            containerPorts.add(containerPort);
+        });
         return containerPorts;
     }
 
@@ -196,7 +203,7 @@ public class DeploymentHandler extends AbstractArtifactHandler {
     private void generate(DeploymentModel deploymentModel) throws KubernetesPluginException {
         List<ContainerPort> containerPorts = null;
         if (deploymentModel.getPorts() != null) {
-            containerPorts = populatePorts(deploymentModel.getPorts());
+            containerPorts = populatePorts(deploymentModel);
         }
         Container container = generateContainer(deploymentModel, containerPorts);
         Deployment deployment = new DeploymentBuilder()
@@ -257,7 +264,7 @@ public class DeploymentHandler extends AbstractArtifactHandler {
     private DockerModel getDockerModel(DeploymentModel deploymentModel) {
         DockerModel dockerModel = new DockerModel();
         String dockerImage = deploymentModel.getImage();
-        String imageTag = dockerImage.substring(dockerImage.lastIndexOf(":") + 1, dockerImage.length());
+        String imageTag = dockerImage.substring(dockerImage.lastIndexOf(":") + 1);
         dockerModel.setBaseImage(deploymentModel.getBaseImage());
         dockerModel.setName(dockerImage);
         dockerModel.setTag(imageTag);

@@ -39,6 +39,7 @@ import static org.ballerinax.kubernetes.utils.KubernetesUtils.getEnvVarMap;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getExternalFileMap;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getImagePullSecrets;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getMap;
+import static org.ballerinax.kubernetes.utils.KubernetesUtils.getPortMap;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getValidName;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.isBlank;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.resolveValue;
@@ -86,6 +87,10 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
                     break;
                 case annotations:
                     deploymentModel.setAnnotations(getMap(((BLangRecordLiteral) keyValue.valueExpr).keyValuePairs));
+                    break;
+                case additionalPorts:
+                    deploymentModel.setAdditionalPorts(
+                            getPortMap(((BLangRecordLiteral) keyValue.valueExpr).keyValuePairs));
                     break;
                 case enableLiveness:
                     deploymentModel.setEnableLiveness(Boolean.valueOf(annotationValue));
@@ -178,6 +183,7 @@ public class DeploymentAnnotationProcessor extends AbstractAnnotationProcessor {
         namespace,
         labels,
         annotations,
+        additionalPorts,
         replicas,
         enableLiveness,
         livenessPort,

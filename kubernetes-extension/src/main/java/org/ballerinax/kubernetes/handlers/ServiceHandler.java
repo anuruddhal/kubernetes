@@ -20,6 +20,8 @@ package org.ballerinax.kubernetes.handlers;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
+import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.client.internal.SerializationUtils;
 import org.ballerinax.kubernetes.KubernetesConstants;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
@@ -29,6 +31,8 @@ import org.ballerinax.kubernetes.models.ServiceModel;
 import org.ballerinax.kubernetes.utils.KubernetesUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.ballerinax.kubernetes.KubernetesConstants.SVC_FILE_POSTFIX;
@@ -39,6 +43,28 @@ import static org.ballerinax.kubernetes.KubernetesConstants.YAML;
  * Generates kubernetes service from annotations.
  */
 public class ServiceHandler extends AbstractArtifactHandler {
+
+    private List<ServicePort> populatePorts(ServiceModel serviceModel) {
+        List<ServicePort> servicePorts = new ArrayList<>();
+
+        ServicePort servicePort = new ServicePortBuilder()
+                .withPort(serviceModel.getPort())
+                .withName("ballerina")
+                .withNewTargetPort(serviceModel.getPort())
+                .withProtocol(KubernetesConstants.KUBERNETES_SVC_PROTOCOL)
+                .build();
+        servicePorts.add(servicePort);
+
+        serviceModel.getAdditionalPorts().forEach((name, port) -> {
+            ServicePort additionalPort = new ServicePortBuilder()
+                    .withPort(port)
+                    .withName(name)
+                    .withProtocol(KubernetesConstants.KUBERNETES_SVC_PROTOCOL)
+                    .build();
+            servicePorts.add(additionalPort);
+        });
+        return servicePorts;
+    }
 
     /**
      * Generate kubernetes service definition from annotation.
@@ -53,11 +79,7 @@ public class ServiceHandler extends AbstractArtifactHandler {
                 .addToLabels(serviceModel.getLabels())
                 .endMetadata()
                 .withNewSpec()
-                .addNewPort()
-                .withProtocol(KubernetesConstants.KUBERNETES_SVC_PROTOCOL)
-                .withPort(serviceModel.getPort())
-                .withNewTargetPort(serviceModel.getPort())
-                .endPort()
+                .withPorts(populatePorts(serviceModel))
                 .addToSelector(KubernetesConstants.KUBERNETES_SELECTOR_KEY, serviceModel.getSelector())
                 .withSessionAffinity(serviceModel.getSessionAffinity())
                 .withType(serviceModel.getServiceType())

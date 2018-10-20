@@ -34,6 +34,7 @@ import java.util.List;
 
 import static org.ballerinax.kubernetes.KubernetesConstants.SVC_POSTFIX;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getMap;
+import static org.ballerinax.kubernetes.utils.KubernetesUtils.getPortMap;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.getValidName;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.isBlank;
 import static org.ballerinax.kubernetes.utils.KubernetesUtils.resolveValue;
@@ -108,6 +109,10 @@ public class ServiceAnnotationProcessor extends AbstractAnnotationProcessor {
                 case labels:
                     serviceModel.setLabels(getMap(((BLangRecordLiteral) keyValue.valueExpr).keyValuePairs));
                     break;
+                case additionalPorts:
+                    serviceModel.setAdditionalPorts(
+                            getPortMap(((BLangRecordLiteral) keyValue.valueExpr).keyValuePairs));
+                    break;
                 case serviceType:
                     serviceModel.setServiceType(KubernetesConstants.ServiceType.valueOf(annotationValue).name());
                     break;
@@ -135,6 +140,7 @@ public class ServiceAnnotationProcessor extends AbstractAnnotationProcessor {
     private enum ServiceConfiguration {
         name,
         labels,
+        additionalPorts,
         serviceType,
         port,
         sessionAffinity
