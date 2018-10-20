@@ -98,7 +98,7 @@ public type ConfigMapKeyRef record {
 # + name - Name of the deployment
 # + namespace - Kubernetes namespace
 # + labels - Map of labels for deployment
-# + labels - Map of annotations for deployment
+# + annotations - Map of annotations for deployment
 # + replicas - Number of replicas
 # + enableLiveness - Enable/Disable liveness probe
 # + livenessPort - Port to check the liveness
@@ -299,6 +299,7 @@ public annotation<service> PersistentVolumeClaim PersistentVolumeClaims;
 #
 # + name - Name of the job
 # + labels - Labels for job
+# + annotations - Map of annotations for job
 # + restartPolicy - Restart policy
 # + backoffLimit - Backoff limit
 # + activeDeadlineSeconds - Active deadline seconds
@@ -319,6 +320,7 @@ public annotation<service> PersistentVolumeClaim PersistentVolumeClaims;
 public type JobConfig record {
     string name;
     map labels;
+    map annotations;
     string restartPolicy;
     string backoffLimit;
     string activeDeadlineSeconds;

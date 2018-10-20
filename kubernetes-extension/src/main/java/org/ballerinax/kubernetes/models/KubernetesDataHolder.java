@@ -50,7 +50,6 @@ public class KubernetesDataHolder {
         this.volumeClaimModelSet = new HashSet<>();
         this.ingressModelSet = new HashSet<>();
         this.deploymentModel = new DeploymentModel();
-//        this.namespace = "";
     }
 
     public DeploymentModel getDeploymentModel() {

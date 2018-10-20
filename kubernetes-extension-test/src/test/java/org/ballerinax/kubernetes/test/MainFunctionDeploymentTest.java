@@ -70,11 +70,11 @@ public class MainFunctionDeploymentTest {
         Assert.assertEquals(deployment.getMetadata().getAnnotations().size(), 3, "Unmatching number of annotations " +
                 "found.");
         Assert.assertEquals(deployment.getMetadata().getAnnotations().get("prometheus.io/scrape"), "true", "Invalid " +
-                "label found.");
+                "annotation found.");
         Assert.assertEquals(deployment.getMetadata().getAnnotations().get("prometheus.io/port"), "9797", "Invalid " +
-                "label found.");
+                "annotation found.");
         Assert.assertEquals(deployment.getMetadata().getAnnotations().get("prometheus.io/path"), "/metrics", "Invalid" +
-                " label found.");
+                " annotation found.");
         KubernetesUtils.deleteDirectory(targetPath);
         KubernetesTestUtils.deleteDockerImage(dockerImage);
     }

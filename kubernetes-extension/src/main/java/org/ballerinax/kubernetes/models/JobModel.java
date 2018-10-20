@@ -35,6 +35,7 @@ import static org.ballerinax.kubernetes.KubernetesConstants.WINDOWS_DEFAULT_DOCK
  */
 public class JobModel extends KubernetesModel {
     private Map<String, String> labels;
+    private Map<String, String> annotations;
     private String restartPolicy;
     private int backoffLimit;
     private int activeDeadlineSeconds;
@@ -55,6 +56,7 @@ public class JobModel extends KubernetesModel {
 
     public JobModel() {
         this.labels = new HashMap<>();
+        this.annotations = new LinkedHashMap<>();
         this.env = new LinkedHashMap<>();
         this.externalFiles = new HashSet<>();
         this.restartPolicy = KubernetesConstants.RestartPolicy.Never.name();
@@ -229,4 +231,11 @@ public class JobModel extends KubernetesModel {
         this.singleYAML = singleYAML;
     }
 
+    public Map<String, String> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Map<String, String> annotations) {
+        this.annotations = annotations;
+    }
 }

@@ -79,6 +79,8 @@ public class JobHandler extends AbstractArtifactHandler {
         JobBuilder jobBuilder = new JobBuilder()
                 .withNewMetadata()
                 .withName(jobModel.getName())
+                .withAnnotations(jobModel.getAnnotations())
+                .withLabels(jobModel.getLabels())
                 .withNamespace(dataHolder.getNamespace())
                 .endMetadata()
                 .withNewSpec()

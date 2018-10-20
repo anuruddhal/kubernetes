@@ -55,6 +55,12 @@ public class JobTest {
         File jobYAML = new File(targetPath + File.separator + "ballerina_job_job.yaml");
         Job job = KubernetesHelper.loadYaml(jobYAML);
         Assert.assertEquals("ballerina-job-job", job.getMetadata().getName());
+        Assert.assertEquals(job.getMetadata().getLabels().size(), 2, "Unmatching number of labels found.");
+        Assert.assertEquals(job.getMetadata().getLabels().get("lang"), "ballerina", "Invalid label found.");
+
+        Assert.assertEquals(job.getMetadata().getAnnotations().size(), 1, "Unmatching number of annotations found.");
+        Assert.assertEquals(job.getMetadata().getAnnotations().get("log"), "info", "Invalid annotations found.");
+
         Assert.assertEquals(1, job.getSpec().getTemplate().getSpec().getContainers().size());
         Container container = job.getSpec().getTemplate().getSpec().getContainers().get(0);
         Assert.assertEquals(dockerImage, container.getImage());

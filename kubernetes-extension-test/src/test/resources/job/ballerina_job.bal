@@ -7,6 +7,7 @@ import ballerinax/kubernetes;
     },
     image: "my-ballerina-job:1.0",
     labels: { "lang": "ballerina" },
+    annotations: { "log": "info" },
     copyFiles: [
         {
             target: "/home/ballerina/data/data.txt",
