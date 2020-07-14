@@ -26,7 +26,6 @@ configurations {
     kubernetesJar
     istioJar
     openshiftJar
-    knativeJar
 }
 
 dependencies{
@@ -67,7 +66,6 @@ def artifactBirDir = file("$project.projectDir/target/caches/bir_cache/ballerina
 def artifactKubernetesJar = file("$project.projectDir/target/caches/jar_cache/ballerina/kubernetes/${tomlSemver}/ballerina-kubernetes-${tomlSemver}.jar")
 def artifactIstioJar = file("$project.projectDir/target/caches/jar_cache/ballerina/istio/${tomlSemver}/ballerina-istio-${tomlSemver}.jar")
 def artifactOpenshiftJar = file("$project.projectDir/target/caches/jar_cache/ballerina/openshift/${tomlSemver}/ballerina-openshift-${tomlSemver}.jar")
-def artifactKnativeJar = file("$project.projectDir/target/caches/jar_cache/ballerina/knative/${tomlSemver}/ballerina-knative-${tomlSemver}.jar")
 
 task ballerinaBuild {
     dependsOn unzip
@@ -118,19 +116,6 @@ task ballerinaBuild {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc knative"
-            } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc knative"
-            }
-        }
-        copy {
-            from file("$project.projectDir/target/apidocs/knative")
-            into file("$project.buildDir/apidocs/docs/knative")
-        }
-        exec {
-            workingDir project.projectDir
-            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build -c -a --skip-tests"
             } else {
                 commandLine 'sh', '-c', "$distributionBinPath/ballerina build -c -a --skip-tests"
@@ -139,8 +124,7 @@ task ballerinaBuild {
         // Copy the TOML to the same folder as the BIRs
         ["${artifactBirDir}/kubernetes/${tomlSemver}",
          "${artifactBirDir}/istio/${tomlSemver}",
-         "${artifactBirDir}/openshift/${tomlSemver}",
-         "${artifactBirDir}/knative/${tomlSemver}"].each { birDir ->
+         "${artifactBirDir}/openshift/${tomlSemver}"].each { birDir ->
             copy {
                 from file("$project.projectDir/Ballerina.toml")
                 into birDir
@@ -152,7 +136,6 @@ task ballerinaBuild {
     outputs.file artifactKubernetesJar
     outputs.file artifactIstioJar
     outputs.file artifactOpenshiftJar
-    outputs.file artifactKnativeJar
 }
 
 artifacts {
@@ -161,7 +144,6 @@ artifacts {
     kubernetesJar file: artifactKubernetesJar, builtBy: ballerinaBuild
     istioJar file: artifactIstioJar, builtBy: ballerinaBuild
     openshiftJar file: artifactOpenshiftJar, builtBy: ballerinaBuild
-    knativeJar file: artifactKnativeJar, builtBy: ballerinaBuild
 }
 
 task createArtifactZip(type: Zip) {

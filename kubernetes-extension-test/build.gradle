@@ -31,7 +31,6 @@ dependencies {
     testImplementation "com.github.docker-java:docker-java:${dockerJavaVersion}"
     testImplementation "io.fabric8:kubernetes-client:${fabric8KubernetesClientVersion}"
     testImplementation "me.snowdrop:istio-model:${snowdropIstioModelVersion}"
-    testImplementation "io.fabric8:knative-client:${fabric8KnativeClientVersion}"
     testImplementation "org.slf4j:slf4j-api:${slf4jVersion}"
     testImplementation "org.slf4j:slf4j-log4j12:${slf4jVersion}"
     testImplementation "org.testng:testng:${testngVersion}"
@@ -42,7 +41,6 @@ dependencies {
     bJars project(path: ":kubernetes-extension-annotations", configuration: "kubernetesJar")
     bJars project(path: ":kubernetes-extension-annotations", configuration: "istioJar")
     bJars project(path: ":kubernetes-extension-annotations", configuration: "openshiftJar")
-    bJars project(path: ":kubernetes-extension-annotations", configuration: "knativeJar")
 }
 
 description = 'Ballerinax - Kubernetes Extension Tests'
